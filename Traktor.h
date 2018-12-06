@@ -31,6 +31,11 @@ public:
     int id;
 
     Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo);
+    Mlaticka* VybratMlaticku();
+    void VylozMlaticku(Mlaticka *mlaticka);
+    void NaplnTraktor();
+    void Transport();
+    void VyprazdniTraktor();
     void Behavior();
 };
 

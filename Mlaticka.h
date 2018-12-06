@@ -19,10 +19,12 @@ class Hektar;
 class Mlaticka: public Process {
     using Process::Activate;
 
+private:
+    bool zabrana;
+
 public:
     static list<Mlaticka *> list;
 
-    bool jizVyklada;
     bool stop;
     Store *kapacita;     // vnitrni kapacita
     int id;
@@ -33,6 +35,9 @@ public:
 
     Hektar* VybratHektar();
     void PoznitHektar(Hektar *hektar);
+    void Zaber();
+    void Uvolni();
+    bool jeZabrana();
 };
 
 #endif //MLATICKA_MLATICKA_H

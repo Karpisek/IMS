@@ -9,7 +9,7 @@ Mlaticka::Mlaticka(int id) {
     this->id = id;
 
     this->stop = false;
-    this->jizVyklada = false;
+    this->zabrana = false;
 
     this->Activate();
 
@@ -50,4 +50,16 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
 void Mlaticka::Activate() {
     this->stop = false;
     Process::Activate();
+}
+
+void Mlaticka::Zaber() {
+    zabrana = true;
+}
+
+void Mlaticka::Uvolni() {
+    zabrana = false;
+}
+
+bool Mlaticka::jeZabrana() {
+    return zabrana;
 }
