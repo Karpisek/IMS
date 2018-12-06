@@ -17,6 +17,8 @@ class Traktor;
 class Hektar;
 
 class Mlaticka: public Process {
+    using Process::Activate;
+
 public:
     static list<Mlaticka *> list;
 
