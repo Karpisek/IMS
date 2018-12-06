@@ -7,12 +7,9 @@
 #include "simlib.h"
 #include <math.h>
 
-
 using namespace std;
-list<Hektar *> hektary;
 
-
-// TODO mozno dedit se store -> output();
+// TODO mozno deditm se store -> output();
 class Hektar {
 public:
     int vynos;      //  v sto-kilogramech
@@ -26,8 +23,10 @@ public:
     }
 };
 
+list<Hektar *> hektary;
+
 class Mlaticka: public Process {
-    Store kapacita;     // vnitrni kapacita
+    Store *kapacita;     // vnitrni kapacita
 
     Mlaticka() {
         kapacita = new Store(8);
@@ -35,18 +34,19 @@ class Mlaticka: public Process {
 
     void Behavior() {
         while(hektary.size() > 0) {
-            Hektar *hektar = hektar.pop_front();
+            Hektar *hektar = hektary.front();
+            hektary.pop_front();
 
-            Store stoKilogramy = new Store(hektar->vynos);
+            Store *stoKilogramy = new Store(hektar->vynos);
 
-            while(!stoKilogramy.Empty()) {
-                Enter(stoKilogramy, 1);     // vezme jeden sto-kilogram
+            while(!stoKilogramy->Empty()) {
+                Enter(*stoKilogramy, 1);     // vezme jeden sto-kilogram
                 Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
-                Leave(kapacita, 1);         // pridani do vlastni kapacity
+                Leave(*kapacita, 1);         // pridani do vlastni kapacity
 
-                if(kapacita.Full()) {
+                if(kapacita->Full()) {
                     // TODO cekani na traktor
-                    Enter(kapacita, 8);     // oddelani 8 z kapacity
+                    Enter(*kapacita, 8);     // oddelani 8 z kapacity
                 }
 
                 else {
@@ -73,16 +73,16 @@ int main(int argc, char **argv) {
         hektary.push_back(new Hektar());
     }
 
-    cout << "Pocet hektaru: " << pole.size() << endl;
+    cout << "Pocet hektaru: " << hektary.size() << endl;
     cout << "Pocet mlaticek: " << pocetMlaticek << endl;
     cout << "Pocet nakladaku: " << pocetNakl << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
 
-    // kombajny
-    list<Mlaticka *> mlaticky;
-    for(int x=0; x < pocetMlaticek ; x++) {
-        pole.push_back(new Mlaticka());
-    }
+//    // kombajny
+//    list<Mlaticka *> mlaticky;
+//    for(int x=0; x < pocetMlaticek ; x++) {
+//        pole.push_back(new Mlaticka());
+//    }
 
 
     cout << "hello" << endl;
