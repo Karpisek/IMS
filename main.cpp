@@ -9,11 +9,11 @@
 
 
 using namespace std;
-
+list<Hektar *> hektary;
 
 
 // TODO mozno dedit se store -> output();
-class Hektar: public Store{
+class Hektar {
 public:
     int vynos;      //  v sto-kilogramech
     double doba;    //  doba sklizne sto-kilogramu v sekundach
@@ -27,17 +27,33 @@ public:
 };
 
 class Mlaticka: public Process {
-    list<Hektar *> hektary;
+    Store kapacita;     // vnitrni kapacita
 
-    Mlaticka(list<Hektar *> hektary) {
-        this->hektary = hektary;
+    Mlaticka() {
+        kapacita = new Store(8);
     }
 
     void Behavior() {
         while(hektary.size() > 0) {
             Hektar *hektar = hektar.pop_front();
 
-            Store stoKilogramy
+            Store stoKilogramy = new Store(hektar->vynos);
+
+            while(!stoKilogramy.Empty()) {
+                Enter(stoKilogramy, 1);     // vezme jeden sto-kilogram
+                Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
+                Leave(kapacita, 1);         // pridani do vlastni kapacity
+
+                if(kapacita.Full()) {
+                    // TODO cekani na traktor
+                    Enter(kapacita, 8);     // oddelani 8 z kapacity
+                }
+
+                else {
+                    continue;           // pokracovani sklizne
+                }
+
+            }
         }
     }
 };
@@ -53,10 +69,8 @@ int main(int argc, char **argv) {
     int pocetNakl = atoi(argv[3]);
     int vzdalenost = atoi(argv[4]);
 
-
-    list<Hektar *> pole;
     for(int x = 0; x < rozloha; x++) {
-        pole.push_back(new Hektar());
+        hektary.push_back(new Hektar());
     }
 
     cout << "Pocet hektaru: " << pole.size() << endl;
