@@ -12,11 +12,53 @@
 #define KAPACITA_MLATICKY 80    // ve sto-kilogramech
 #define MINIMALNI_KAPACITA 0.5  // 0...1 minimalni kapacita pro vyprazdneni
 
+#define MIN_DOBA_CESTY 100      // minimalni doba cesty v minutach
+#define MAX_DOBA_CESTY 200      // maximalni doba cesty //todo prevest na exp (vsechno je exp)
+
+#define MIST_NA_VYLOZENI 2
+#define SILO_CAPACTY 30000      // kapacita sila ve stokilogramech
+
 using namespace std;
 
 class Traktor;
 class Hektar;
 class Mlaticka;
+
+class Vykladka: public Store {
+public:
+    Queue queue;
+
+    Vykladka() {
+        SetCapacity(MIST_NA_VYLOZENI);
+    }
+
+    void Enter(Entity *e, unsigned long rcap) {
+        if(Free() > 0) {
+            Store::Enter(e, rcap);
+        } else {
+            queue.InsLast(e);
+            e->Passivate();
+        }
+    }
+
+    void Leave(unsigned long rcap) {
+        if(queue.size() == 0) {
+            Store::Leave(rcap);
+        }
+        else {
+            queue.GetFirst()->Activate();
+        }
+    }
+
+};
+
+class Silo: public Store {
+public:
+    Silo() {
+        SetCapacity(10000);
+    }
+};
+
 
 // TODO mozno deditm se store -> output();
 class Hektar {
@@ -92,18 +134,24 @@ class Traktor: public Process {
 private:
     list<Mlaticka *> *mlaticky;
     list<Traktor *> *traktory;
+
+    Vykladka *vykladka;
+    Silo *silo;
+
     int vzdalenost;
 
 public:
     Store *kapacita;     // vnitrni kapacita
     int id;
 
-    Traktor(int id, list<Mlaticka *> *mlaticky, list<Traktor *> *traktory, int vzdalenost) {
+    Traktor(int id, list<Mlaticka *> *mlaticky, list<Traktor *> *traktory, int vzdalenost, Vykladka *vykladka, Silo *silo) {
         this->kapacita = new Store(KAPACITA_TRAKTORU);
         this->id = id;
         this->mlaticky = mlaticky;
         this->traktory = traktory;
         this->vzdalenost = vzdalenost;
+        this->vykladka = vykladka;
+        this->silo = silo;
 
         this->Activate();
     }
@@ -117,8 +165,8 @@ public:
                 // dokud neni traktor plny
 
                 Mlaticka *nejplnejsi = nullptr;
-                for (auto const& mlaticka: *mlaticky) {
 
+                for (auto const& mlaticka: *mlaticky) {
                     if(mlaticka->kapacita->Full()) {
                         nejplnejsi = mlaticka;
                         break;
@@ -143,6 +191,8 @@ public:
                     // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
                     nejplnejsi->jizVyklada = true;
 
+                    cout << "Nakladak: " << id << " vyklada:" << nejplnejsi->id << " vyuziti nakladaku pred nalozenim: " << kapacita->Used()  <<endl;
+
                     while(!kapacita->Full() && !nejplnejsi->kapacita->Empty()) {
                         nejplnejsi->kapacita->Leave(1);
                         Enter(*kapacita, 1);
@@ -161,13 +211,36 @@ public:
                 Wait(0.01);
             }
 
-            // transport plneho nakladaku
-            cout << "nakladak odjizdi na " << vzdalenost << " minut" << endl;
+            // transport plneho nakladaku, zaokrouhleno na desetiny minuty
+            double dobaCesty = ((int)(Uniform(MIN_DOBA_CESTY, MAX_DOBA_CESTY) * 10 ))/ 10.0 ;
 
-            Wait(vzdalenost);
+            cout << "nakladak odjizdi na " << dobaCesty << " minut" << endl;
 
-            // TODO navazat na sklad
-            Leave(*kapacita, kapacita->Used());
+            Wait(dobaCesty);
+
+            double zacatekVykladani = Time;
+
+            // pokus o zabrani vykladky
+            vykladka->Enter(this, 1);
+
+            while (!kapacita->Empty()) {
+                Enter(*silo, 1);
+                Leave(*kapacita, 1);
+
+                // doba vykladky trva 0.75 minut
+                Wait(0.75);
+            }
+
+            vykladka->Leave(1);
+
+            cout << "nakladak " << id << " doba vykladani " << Time - zacatekVykladani << endl;
+
+            // transport prazdnehom nakladaku, zaokrouhleno na desetiny minuty
+            dobaCesty = ((int)(Uniform(MIN_DOBA_CESTY, MAX_DOBA_CESTY) * 10 ))/ 10.0 ;
+
+            cout << "nakladak prijizdi za " << dobaCesty << " minut" << endl;
+
+            Wait(dobaCesty);
 
         }
 
@@ -178,7 +251,8 @@ public:
 
 int main(int argc, char **argv) {
 
-    Init(0, 12000);
+    Init(0, 15000);
+    SetStep(0.001);
     RandomSeed(time(nullptr));
 
     // listy jednotlivych stroju
@@ -200,14 +274,18 @@ int main(int argc, char **argv) {
     cout << "Pocet nakladaku: " << pocetTraktoru << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
 
-    // Vytvareni mlaticek
+    // vytvoreni mista pro vykladku
+    Vykladka vykladka;
+    Silo silo;
+
+    // vytvareni mlaticek
     for(int x=0; x < pocetMlaticek ; x++) {
         mlaticky.push_back(new Mlaticka(x, &hektary, &mlaticky));
     }
 
-    // Vytvareni traktoru
+    // vytvareni traktoru
     for(int x=0; x < pocetTraktoru ; x++) {
-        traktory.push_back(new Traktor(x, &mlaticky, &traktory, vzdalenost));
+        traktory.push_back(new Traktor(x, &mlaticky, &traktory, vzdalenost, &vykladka, &silo));
     }
 
     Run();
