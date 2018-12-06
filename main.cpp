@@ -36,6 +36,7 @@ private:
     list<Mlaticka *> *mlaticky;
 
 public:
+    bool jizVyklada;
     bool stop;
     Store *kapacita;     // vnitrni kapacita
     int id;
@@ -47,6 +48,7 @@ public:
         this->mlaticky = mlaticky;
 
         this->stop = false;
+        this->jizVyklada = false;
 
         this->Activate();
     }
@@ -138,6 +140,9 @@ public:
                 // vylozeni nejplnejsi mlaticky
                 if(nejplnejsi != nullptr) {
 
+                    // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
+                    nejplnejsi->jizVyklada = true;
+
                     while(!kapacita->Full() && !nejplnejsi->kapacita->Empty()) {
                         nejplnejsi->kapacita->Leave(1);
                         Enter(*kapacita, 1);
@@ -149,6 +154,8 @@ public:
                         // vyprazdeni 100kg trva 0.02 minut
                         Wait(0.02);
                     }
+
+                    nejplnejsi->jizVyklada = false;
                 }
 
                 Wait(0.01);
