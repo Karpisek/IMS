@@ -26,10 +26,14 @@ public:
 list<Hektar *> hektary;
 
 class Mlaticka: public Process {
-    Store *kapacita;     // vnitrni kapacita
 
-    Mlaticka() {
+public:
+    Store *kapacita;     // vnitrni kapacita
+    int id;
+
+    Mlaticka(int id) {
         kapacita = new Store(8);
+        this->id = id;
     }
 
     void Behavior() {
@@ -78,11 +82,13 @@ int main(int argc, char **argv) {
     cout << "Pocet nakladaku: " << pocetNakl << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
 
-//    // kombajny
-//    list<Mlaticka *> mlaticky;
-//    for(int x=0; x < pocetMlaticek ; x++) {
-//        pole.push_back(new Mlaticka());
-//    }
+    // kombajny
+    list<Mlaticka> mlaticky;
+    for(int x=0; x < pocetMlaticek ; x++) {
+        Mlaticka mlaticka(x);
+        mlaticky.push_back(mlaticka);
+
+    }
 
 
     cout << "hello" << endl;
