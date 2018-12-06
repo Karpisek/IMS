@@ -13,7 +13,7 @@ using namespace std;
 
 
 // TODO mozno dedit se store -> output();
-class Hektar {
+class Hektar: public Store{
 public:
     int vynos;      //  v sto-kilogramech
     double doba;    //  doba sklizne sto-kilogramu v sekundach
@@ -27,21 +27,23 @@ public:
 };
 
 class Mlaticka: public Process {
+    list<Hektar *> hektary;
 
-};
-
-class StoKilogram: public Process {
-    Mlaticka mlaticka;
-
-    StoKilogram(Mlaticka mlaticka) {
-        this->mlaticka = mlaticka;
+    Mlaticka(list<Hektar *> hektary) {
+        this->hektary = hektary;
     }
 
     void Behavior() {
-        Seize(mlaticka);
-        Wait(SERVICE);
-        Release(mlaticka);
+        while(hektary.size() > 0) {
+            Hektar *hektar = hektar.pop_front();
+
+            Store stoKilogramy
+        }
     }
+};
+
+class StoKilogram: public Store {
+
 };
 
 int main(int argc, char **argv) {
@@ -62,18 +64,11 @@ int main(int argc, char **argv) {
     cout << "Pocet nakladaku: " << pocetNakl << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
 
-
     // kombajny
     list<Mlaticka *> mlaticky;
     for(int x=0; x < pocetMlaticek ; x++) {
         pole.push_back(new Mlaticka());
     }
-
-
-    // jeden hektar a jeden kombajn
-    StoKilogram* stoKilogram = new StoKilogram(new Mlaticka);
-    stoKilogram->Activate();
-
 
 
     cout << "hello" << endl;
