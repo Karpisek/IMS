@@ -25,8 +25,8 @@ public:
     double doba;    //  doba sklizne sto-kilogramu v sekundach
 
     Hektar() {
-        this->vynos = (int)Uniform(43, 49);         // TODO NAHODNE GENEROVANI
-        this->doba = ((int)((Uniform(12, 20)/this->vynos) * 10 ))/ 10.0 ; // TODO DOPOCITAT DOBU PODLE VYGENEROVANI
+        this->vynos = (int)Uniform(43, 49);
+        this->doba = ((int)((Uniform(12, 20)/this->vynos) * 10 ))/ 10.0 ;
     }
 };
 
@@ -60,7 +60,7 @@ public:
             hektary->pop_front();
 
             Store stoKilogramy(hektar->vynos);
-            stoKilogramy.Enter(this, hektar->vynos);
+            Enter(stoKilogramy, hektar->vynos);
 
             while(!stoKilogramy.Empty()) {
                 Leave(stoKilogramy, 1);     // vezme jeden sto-kilogram
@@ -73,9 +73,7 @@ public:
                     this->Passivate();
                 }
 
-                else {
-                               // pokracovani sklizne
-                }
+                // pokracovani sklizne az kdyz jej nakladak znovu aktivuje
 
             }
         }
@@ -94,16 +92,18 @@ class Traktor: public Process {
 private:
     list<Mlaticka *> *mlaticky;
     list<Traktor *> *traktory;
+    int vzdalenost;
 
 public:
     Store *kapacita;     // vnitrni kapacita
     int id;
 
-    Traktor(int id, list<Mlaticka *> *mlaticky, list<Traktor *> *traktory) {
+    Traktor(int id, list<Mlaticka *> *mlaticky, list<Traktor *> *traktory, int vzdalenost) {
         this->kapacita = new Store(KAPACITA_TRAKTORU);
         this->id = id;
         this->mlaticky = mlaticky;
         this->traktory = traktory;
+        this->vzdalenost = vzdalenost;
 
         this->Activate();
     }
@@ -113,7 +113,7 @@ public:
         while(mlaticky->size() > 0) {
             // nalzeni nejplnejsi mlaticky
 
-            while(!this->kapacita->Full() && mlaticky->size() != 0) {
+            while(!kapacita->Full() && mlaticky->size() != 0) {
                 // dokud neni traktor plny
 
                 Mlaticka *nejplnejsi = nullptr;
@@ -162,9 +162,9 @@ public:
             }
 
             // transport plneho nakladaku
-            cout << "nakladak odjizdi na 30 minut" << endl;
+            cout << "nakladak odjizdi na " << vzdalenost << " minut" << endl;
 
-            this->Wait(40);
+            Wait(vzdalenost);
 
             // TODO navazat na sklad
             Leave(*kapacita, kapacita->Used());
@@ -174,10 +174,6 @@ public:
         traktory->remove(this);
         this->Terminate();
     }
-};
-
-class StoKilogram: public Store {
-
 };
 
 int main(int argc, char **argv) {
@@ -211,11 +207,9 @@ int main(int argc, char **argv) {
 
     // Vytvareni traktoru
     for(int x=0; x < pocetTraktoru ; x++) {
-        traktory.push_back(new Traktor(x, &mlaticky, &traktory));
+        traktory.push_back(new Traktor(x, &mlaticky, &traktory, vzdalenost));
     }
 
     Run();
-
-    cout << "hello" << endl;
 }
 
