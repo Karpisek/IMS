@@ -4,28 +4,28 @@
 
 #include "Traktor.h"
 
-Traktor::raktor(int id, list<Mlaticka *> *mlaticky, list<Traktor *> *traktory, int vzdalenost, Vykladka *vykladka, Silo *silo) {
+Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
     this->kapacita = new Store(KAPACITA_TRAKTORU);
     this->id = id;
-    this->mlaticky = mlaticky;
-    this->traktory = traktory;
     this->vzdalenost = vzdalenost;
     this->vykladka = vykladka;
     this->silo = silo;
 
     this->Activate();
+
+    Traktor::list.push_back(this);
 }
 
 void Traktor::Behavior() {
-    while(mlaticky->size() > 0) {
+    while(Mlaticka::list.size() > 0) {
         // nalzeni nejplnejsi mlaticky
 
-        while(!kapacita->Full() && mlaticky->size() != 0) {
+        while(!kapacita->Full() && Mlaticka::list.size() != 0) {
             // dokud neni traktor plny
 
             Mlaticka *nejplnejsi = nullptr;
 
-            for (auto const& mlaticka: *mlaticky) {
+            for (auto const& mlaticka: Mlaticka::list) {
                 if(mlaticka->kapacita->Full()) {
                     nejplnejsi = mlaticka;
                     break;
@@ -103,6 +103,6 @@ void Traktor::Behavior() {
 
     }
 
-    traktory->remove(this);
+    Traktor::list.remove(this);
     this->Terminate();
 }
