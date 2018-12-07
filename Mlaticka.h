@@ -23,7 +23,7 @@ private:
     bool zabrana;
 
 public:
-    static list<Mlaticka *> list;
+    static list<Mlaticka *> vse;
 
     bool stop;
     Store *kapacita;     // vnitrni kapacita

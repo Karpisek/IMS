@@ -11,5 +11,5 @@ Hektar::Hektar() {
     SetCapacity(vynos);     //nastaveni kapacity
     Enter(nullptr, vynos);  //naplneni kapacity
 
-    Hektar::list.push_back(this);
+    Hektar::vse.push_back(this);
 }

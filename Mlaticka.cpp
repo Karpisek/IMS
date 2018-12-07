@@ -13,22 +13,22 @@ Mlaticka::Mlaticka(int id) {
 
     this->Activate();
 
-    Mlaticka::list.push_back(this);
+    Mlaticka::vse.push_back(this);
 }
 
 void Mlaticka::Behavior() {
-    while(Hektar::list.size() > 0) {
+    while(Hektar::vse.size() > 0) {
         Hektar *hektar = VybratHektar();
         PoznitHektar(hektar);
     }
 
-    Mlaticka::list.remove(this);
+    Mlaticka::vse.remove(this);
     this->Terminate();
 }
 
 Hektar* Mlaticka::VybratHektar() {
-    Hektar *hektar = Hektar::list.front();
-    Hektar::list.pop_front();
+    Hektar *hektar = Hektar::vse.front();
+    Hektar::vse.pop_front();
 
     return hektar;
 }

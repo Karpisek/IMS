@@ -18,9 +18,9 @@ using namespace std;
 
 // static listy jednotlivych stroju
 
-list<Hektar *> Hektar::list;
-list<Mlaticka *> Mlaticka::list;
-list<Traktor *> Traktor::list;
+list<Hektar *> Hektar::vse;
+list<Mlaticka *> Mlaticka::vse;
+list<Traktor *> Traktor::vse;
 
 int main(int argc, char **argv) {
 
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         new Hektar();
     }
 
-    cout << "Pocet hektaru: " << Hektar::list.size() << endl;
+    cout << "Pocet hektaru: " << Hektar::vse.size() << endl;
     cout << "Pocet mlaticek: " << pocetMlaticek << endl;
     cout << "Pocet nakladaku: " << pocetTraktoru << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;

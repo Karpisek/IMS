@@ -26,7 +26,7 @@ private:
     int vzdalenost;
 
 public:
-    static list<Traktor *> list;
+    static list<Traktor *> vse;
     Store *kapacita;     // vnitrni kapacita
     int id;
 

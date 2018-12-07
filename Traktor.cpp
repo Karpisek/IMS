@@ -13,11 +13,11 @@ Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
 
     this->Activate();
 
-    Traktor::list.push_back(this);
+    Traktor::vse.push_back(this);
 }
 
 void Traktor::NaplnTraktor() {
-    while(!kapacita->Full() && Mlaticka::list.size() != 0) {
+    while(!kapacita->Full() && Mlaticka::vse.size() != 0) {
         // dokud neni traktor plny
 
         // nalezeni nejplnejsi mlaticky co splnuje minimalni threshold
@@ -29,7 +29,7 @@ void Traktor::NaplnTraktor() {
 }
 
 void Traktor::Behavior() {
-    while(Mlaticka::list.size() > 0) {
+    while(Mlaticka::vse.size() > 0) {
 
         // postupne plneni traktoru
         NaplnTraktor();
@@ -44,14 +44,14 @@ void Traktor::Behavior() {
         Transport();
     }
 
-    Traktor::list.remove(this);
+    Traktor::vse.remove(this);
     this->Terminate();
 }
 
 Mlaticka* Traktor::VybratMlaticku() {
     Mlaticka *vybrana = nullptr;
 
-    for (auto const& aktualni: Mlaticka::list) {
+    for (auto const& aktualni: Mlaticka::vse) {
 
         // pokud je mlaticka jiz obsluhovana preskocime
         if(aktualni->jeZabrana()) {

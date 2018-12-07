@@ -13,7 +13,7 @@ using namespace std;
 // TODO mozno deditm se store -> output();
 class Hektar: public Store {
 public:
-    static list<Hektar *> list;
+    static list<Hektar *> vse;
 
     int vynos;      //  v sto-kilogramech
     double doba;    //  doba sklizne sto-kilogramu v sekundach
