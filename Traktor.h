@@ -12,6 +12,7 @@
 #include "Vykladka.h"
 #include "Silo.h"
 #include "Mlaticka.h"
+#include <algorithm>
 
 using namespace std;
 
@@ -37,7 +38,7 @@ public:
 
     Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo);
     Mlaticka* VybratMlaticku();
-    void VylozMlaticku(Mlaticka *mlaticka);
+    int VylozMlaticku(Mlaticka *mlaticka);
     void NaplnTraktor();
     void Transport();
     void VyprazdniTraktor();

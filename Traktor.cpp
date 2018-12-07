@@ -17,9 +17,26 @@ Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
 
 void Traktor::Behavior() {
     while (true) {
-        Zaber();
 
-        VylozMlaticku(mlaticka);
+        cout << "--------------------------------------------------------" << endl;
+        cout << "Time: " << Time << endl;
+        cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
+        cout << "pred:" << endl;
+        cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
+        cout << "\t Mlaticka [" << mlaticka->kapacita->Used() << "/" << mlaticka->kapacita->Capacity() << "]" << endl;
+        cout << endl;
+
+        int vylozeno = VylozMlaticku(mlaticka);
+
+
+        cout << "--------------------------------------------------------" << endl;
+        cout << "Time: " << Time << endl;
+        cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
+        cout << "po:" << endl;
+        cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
+        cout << "\t Mlaticka [" << mlaticka->kapacita->Used() << "/" << mlaticka->kapacita->Capacity() << "]" << endl;
+        cout << "--------------------------------------------------------" << endl;
+        cout << endl;
 
         // pokud je traktor plny, odjizdim, jinak uvolnim
         if(kapacita->Full()) {
@@ -29,14 +46,13 @@ void Traktor::Behavior() {
         }
 
         Uvolni();
-        Passivate();
     }
 }
 
 Mlaticka* Traktor::VybratMlaticku() {
     Mlaticka *vybrana = nullptr;
 
-    for (auto const& aktualni: pozadavky) {
+    for (auto const& aktualni: Traktor::pozadavky) {
 
         // pokud je mlaticka jiz obsluhovana preskocime
         if(aktualni->jeZabrana()) {
@@ -47,11 +63,6 @@ Mlaticka* Traktor::VybratMlaticku() {
         if(aktualni->kapacita->Full()) {
             vybrana = aktualni;
             break;
-        }
-
-        // pokud je uroven zaplneni mlaticky nizsi nez threshold pokracujeme
-        if(aktualni->kapacita->Used() < aktualni->kapacita->Capacity() * MINIMALNI_KAPACITA) {
-            continue;
         }
 
         // pokud je doposud nevybrana, bereme vse
@@ -65,49 +76,67 @@ Mlaticka* Traktor::VybratMlaticku() {
         }
     }
 
+    // pokud je mlaticka vybrana, odeber ji z pozadavku
+    if(vybrana != nullptr) {
+        pozadavky.remove(vybrana);
+    }
+
     return vybrana;
 }
 
-void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
-    // vylozeni nejplnejsi mlaticky
-    if(mlaticka != nullptr) {
+int Traktor::VylozMlaticku(Mlaticka *mlaticka) {
+    // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
+    mlaticka->Zaber();
 
-        // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
-        mlaticka->Zaber();
+    int pred = kapacita->Used();
+    while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
+        mlaticka->kapacita->Leave(1);
+        Enter(*kapacita, 1);
 
-        cout << "Nakladak: " << id << " vyklada:" << mlaticka->id << " vyuziti nakladaku pred nalozenim: " << kapacita->Used()  <<endl;
-
-        while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
-            mlaticka->kapacita->Leave(1);
-            Enter(*kapacita, 1);
-
-            if(mlaticka->stop) {
-                mlaticka->Activate();
-            }
-
-            // vyprazdeni 100kg trva 0.02 minut
-            Wait(0.02);
+        if(mlaticka->stop) {
+            mlaticka->Activate();
         }
 
-        mlaticka->Uvolni();
+        // vyprazdeni 100kg trva 0.02 minut
+        Wait(0.02);
     }
+
+    mlaticka->Uvolni();
+
+    return kapacita->Used() - pred;
 }
 
 void Traktor::Transport() {
     // transport plneho nakladaku, zaokrouhleno na desetiny minuty
     double dobaCesty = ((int)(Uniform(MIN_DOBA_CESTY, MAX_DOBA_CESTY) * 10 ))/ 10.0 ;
 
-    cout << "nakladak odjizdi na " << dobaCesty << " minut" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Traktor (" << id << ") odjizdi na " << dobaCesty << " minut" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << endl;
 
     Wait(dobaCesty);
-
 }
 
 void Traktor::VyprazdniTraktor() {
     double zacatekVykladani = Time;
 
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Traktor (" << id << ") dorazil k vykladce"<< endl;
+    cout << "\tVykladka ma frontu o velikosti [" << vykladka->queue.size() << "]" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << endl;
+
     // pokus o zabrani vykladky
     vykladka->Enter(this, 1);
+
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Traktor (" << id << ") Zacina vykladku " << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << endl;
 
     while (!kapacita->Empty()) {
         Enter(*silo, 1);
@@ -119,7 +148,6 @@ void Traktor::VyprazdniTraktor() {
 
     vykladka->Leave(1);
 
-    cout << "nakladak " << id << " doba vykladani " << Time - zacatekVykladani << endl;
 }
 
 bool Traktor::jeVolny() {
@@ -128,18 +156,26 @@ bool Traktor::jeVolny() {
 
 void Traktor::Zaber() {
     this->volny = false;
+    Activate();
 }
 
 void Traktor::Uvolni() {
+
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Traktor (" << id << ") je volny" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << endl;
 
     // pri uvolneni traktoru existuje min. jedna mlaticka ktera je mozna na vylozeni
     if(Traktor::pozadavky.size() > 0) {
         Mlaticka *mlaticka = VybratMlaticku();
         PriradMlaticku(mlaticka);
-        Activate();
-    }
 
-    this->volny = true;
+    } else {
+        volny = true;
+        Passivate();
+    }
 }
 
 void Traktor::PriradMlaticku(Mlaticka *mlaticka) {
@@ -169,15 +205,25 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
 
     // pokud je nejaky volny traktor, je zvolen nejplnejsi a prirazen dane malticce
     if(vybran != nullptr) {
+
         vybran->PriradMlaticku(zadatel);
-        vybran->Activate();
+        vybran->Zaber();
     }
 
     // pokud zadny traktro neni volny, je mlaticka pridana na seznam pozadavku, jakmile se nejaky traktor vrati, odbavi ji
     else {
-        Traktor::VytvorPozadavek(zadatel);
-    }
+        bool zadano = (find(Traktor::pozadavky.begin(), Traktor::pozadavky.end(), zadatel) != Traktor::pozadavky.end());
 
+        if(!zadano) {
+            cout << "--------------------------------------------------------" << endl;
+            cout << "Time: " << Time << endl;
+            cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"<< endl;
+            cout << "--------------------------------------------------------" << endl;
+            cout << endl;
+
+            Traktor::VytvorPozadavek(zadatel);
+        }
+    }
 }
 
 void Traktor::VytvorPozadavek(Mlaticka *mlaticka) {
