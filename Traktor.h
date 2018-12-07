@@ -10,22 +10,19 @@
 #include <iostream>
 #include <list>
 #include "Vykladka.h"
-#include "Silo.h"
 #include "Mlaticka.h"
 #include <algorithm>
 #include <vector>
+#include "Kapacita.h"
 
 using namespace std;
 
-class Silo;
 class Mlaticka;
 class Vykladka;
 
 class Traktor: public Process {
 private:
     Vykladka *vykladka;
-    Silo *silo;
-    int vzdalenost;
 
     Mlaticka *mlaticka;
     bool volny;
@@ -36,16 +33,15 @@ public:
     static list<Traktor *> vse;         // list vsech traktoru
     static list<Mlaticka *> pozadavky;  // list pozadavku
 
-    Store *kapacita;     // vnitrni kapacita
+    Kapacita *kapacita;     // vnitrni kapacita
     int id;
 
-    Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo);
+    Traktor(int id, Vykladka *vykladka, int kapacita);
     Mlaticka* VybratMlaticku();
-    int VylozMlaticku(Mlaticka *mlaticka);
-    void NaplnTraktor();
-    void Transport();
+    void VylozMlaticku(Mlaticka *mlaticka);
+    void Transport(double vzdalenost);
     void VyprazdniTraktor();
-    void Behavior();
+    void Behavior() override;
 
     void PriradMlaticku(Mlaticka *mlaticka);
 

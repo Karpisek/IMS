@@ -7,14 +7,24 @@
 
 #include "simlib.h"
 #include "macros.h"
+#include <list>
+#include "Traktor.h"
+#include "Kapacita.h"
 
-class Vykladka: public Store {
+using namespace std;
+
+class Traktor;
+
+class Vykladka: public Event {
 public:
-    Queue queue;
+    Kapacita *kapacita;
+    Kapacita *mistaNaVykladku;
+    list<Traktor *> fronta;
 
     Vykladka();
-    void Enter(Entity *e, unsigned long rcap);
-    void Leave(unsigned long rcap);
+    void Behavior() override;
+    void ZaberMisto(Traktor *traktor);
+    void Uvolni();
 };
 
 #endif //MLATICKA_VYKLADKA_H

@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <list>
-#include <math.h>
+#include <cmath>
 #include <algorithm>
 #include <string>
 
@@ -23,9 +23,15 @@ list<Mlaticka *> Mlaticka::vse;
 list<Traktor *> Traktor::vse;
 list<Mlaticka *> Traktor::pozadavky;
 
-
+int vzdalenost;
 
 int main(int argc, char **argv) {
+
+    if(argc != 6) {
+        cout << "Struktura parametru: [rozloha pole (ha)] [pocet mlaticek] [pocet traktoru] [kapacita traktoru (t)] [vzdalenost zavodu (km)] " << endl;
+        exit(0);
+    }
+
     list<Traktor *> listTraktoru;
     list<Mlaticka *> listMlaticek;
 
@@ -36,7 +42,8 @@ int main(int argc, char **argv) {
     int rozloha = atoi(argv[1]);
     int pocetMlaticek = atoi(argv[2]);
     int pocetTraktoru = atoi(argv[3]);
-    int vzdalenost = atoi(argv[4]);
+    int kapacitaTraktoru = atoi(argv[4]);
+    vzdalenost = atoi(argv[5]);
 
     for(int x = 0; x < rozloha; x++) {
         new Hektar();
@@ -45,12 +52,12 @@ int main(int argc, char **argv) {
     cout << "Pocet hektaru: " << Hektar::vse.size() << endl;
     cout << "Pocet mlaticek: " << pocetMlaticek << endl;
     cout << "Pocet nakladaku: " << pocetTraktoru << endl;
+    cout << "Kapacita nakladaku: " << kapacitaTraktoru << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
     cout << "*******************************" << endl << endl;
 
     // vytvoreni mista pro vykladku
     Vykladka vykladka;
-    Silo silo;
 
     // vytvareni mlaticek
     for(int x=0; x < pocetMlaticek ; x++) {
@@ -59,7 +66,7 @@ int main(int argc, char **argv) {
 
     // vytvareni traktoru
     for(int x=0; x < pocetTraktoru ; x++) {
-        new Traktor(x, vzdalenost, &vykladka, &silo);
+        new Traktor(x, &vykladka, kapacitaTraktoru);
 
     }
 

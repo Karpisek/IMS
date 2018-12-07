@@ -5,18 +5,20 @@
 #include "Mlaticka.h"
 
 Mlaticka::Mlaticka(int id) {
-    this->kapacita = new Store(KAPACITA_MLATICKY);
+    this->kapacita = new Kapacita(KAPACITA_MLATICKY);
     this->id = id;
 
     this->stop = false;
     this->zabrana = false;
 
-    this->Activate();
-
     Mlaticka::vse.push_back(this);
+    Activate();
 }
 
 void Mlaticka::Behavior() {
+
+    Transport(vzdalenost);
+
     while(!Hektar::vse.empty()) {
         Hektar *hektar = VybratHektar();
         PoznitHektar(hektar);
@@ -24,6 +26,7 @@ void Mlaticka::Behavior() {
 
     // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
     if(kapacita->Used() > 0) {
+        Mlaticka::vse.remove(this);
         Traktor::PriradTraktor(this);
 
         cout << "--------------------------------------------------------" << endl;
@@ -38,9 +41,11 @@ void Mlaticka::Behavior() {
         this->Passivate();
     }
 
-    Mlaticka::vse.remove(this);
-    this->PrintZaznamy();
-    this->Terminate();
+    // presun do zavodu
+    Transport(vzdalenost);
+
+    PrintZaznamy();
+    Terminate();
 }
 
 Hektar* Mlaticka::VybratHektar() {
@@ -55,7 +60,7 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
         PridejZaznamPrace(true);
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
-        Enter(*kapacita, 1);        // pridani do vlastni kapacity
+        kapacita->Enter(1);        // pridani do vlastni kapacity
         PridejZaznamKapacita();             //pridani zaznamu o zmene kapacity
 
         // pokud je kapacita nad threshold, volam traktor
@@ -122,4 +127,18 @@ void Mlaticka::PrintZaznamy() {
         myfile << this->cas2[i] << " " <<this->prace[i] << endl;
     }
     myfile.close();
+}
+
+void Mlaticka::Transport(double vzdalenost) {
+
+    // transport mlaticky na danou vzdalenost
+    double dobaCesty = vzdalenost/(double)MLATICKA_SILNICE_RYCHLOST * HODINY_NA_MIN;
+
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Mlaticka (" << id << ") odjizdi na " << dobaCesty << " minut" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << endl;
+
+    Wait(dobaCesty);
 }
