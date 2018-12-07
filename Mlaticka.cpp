@@ -36,8 +36,7 @@ void Mlaticka::Behavior() {
     }
 
     Mlaticka::vse.remove(this);
-    cout << id << endl;
-    this->PrintZaznamy();
+    //this->PrintZaznamy();
     this->Terminate();
 }
 
@@ -91,18 +90,14 @@ bool Mlaticka::jeZabrana() {
 }
 
 void Mlaticka::PridejZaznam() {
-    cout << Time << endl;
     cas.push_back(Time);
-    cout << "tady ano" << endl;
     naplneni.push_back(kapacita->Used());
-    cout << "jop" << endl;
 }
 
 void Mlaticka::PrintZaznamy() {
     ofstream myfile;
     string jmeno = "mlaticka" + to_string(this->id) + ".dat";
     myfile.open(jmeno);
-    cout << cas.size() << endl;
     for(unsigned int i = 0;this->cas.size() > i; i++){
         myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
     }

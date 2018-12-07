@@ -13,6 +13,7 @@
 #include "Silo.h"
 #include "Mlaticka.h"
 #include <algorithm>
+#include <vector>
 
 using namespace std;
 
@@ -30,6 +31,8 @@ private:
     bool volny;
 
 public:
+    vector<double> cas;
+    vector<int> naplneni;
     static list<Traktor *> vse;         // list vsech traktoru
     static list<Mlaticka *> pozadavky;  // list pozadavku
 
@@ -49,6 +52,8 @@ public:
     void Zaber();
     void Uvolni();
     bool jeVolny();
+    void PridejZaznam();
+    void PrintZaznamy();
 
     static void PriradTraktor(Mlaticka *mlaticka);
     static void VytvorPozadavek(Mlaticka *mlaticka);

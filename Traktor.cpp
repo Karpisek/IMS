@@ -20,6 +20,7 @@ void Traktor::Behavior() {
 
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
+        cout << ") vyklada Mlaticku (" << mlaticka->id << endl;
         cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
         cout << "pred:" << endl;
         cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
@@ -31,6 +32,7 @@ void Traktor::Behavior() {
 
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
+        cout << 3 << endl;
         cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
         cout << "po:" << endl;
         cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
@@ -78,9 +80,9 @@ Mlaticka* Traktor::VybratMlaticku() {
 
     // pokud je mlaticka vybrana, odeber ji z pozadavku
     if(vybrana != nullptr) {
-        pozadavky.remove(vybrana);
+        Traktor::pozadavky.remove(vybrana);
+        //vybrana->Zaber();
     }
-
     return vybrana;
 }
 
@@ -90,11 +92,12 @@ int Traktor::VylozMlaticku(Mlaticka *mlaticka) {
 
     int pred = kapacita->Used();
     mlaticka->PridejZaznam();
+    PridejZaznam();
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
         mlaticka->kapacita->Leave(1);
-        cout << "odtud"<< endl;
         mlaticka->PridejZaznam();
         Enter(*kapacita, 1);
+        PridejZaznam();
 
         if(mlaticka->stop) {
             mlaticka->Activate();
@@ -141,9 +144,11 @@ void Traktor::VyprazdniTraktor() {
     cout << "--------------------------------------------------------" << endl;
     cout << endl;
 
+    PridejZaznam();
     while (!kapacita->Empty()) {
         Enter(*silo, 1);
         Leave(*kapacita, 1);
+        PridejZaznam();
 
         // doba vykladky trva 0.75 minut
         Wait(0.75);
@@ -177,6 +182,7 @@ void Traktor::Uvolni() {
 
     } else {
         volny = true;
+        PrintZaznamy();
         Passivate();
     }
 }
@@ -218,17 +224,35 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
         bool zadano = (find(Traktor::pozadavky.begin(), Traktor::pozadavky.end(), zadatel) != Traktor::pozadavky.end());
 
         if(!zadano) {
-            cout << "--------------------------------------------------------" << endl;
-            cout << "Time: " << Time << endl;
-            cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"<< endl;
-            cout << "--------------------------------------------------------" << endl;
-            cout << endl;
+            if(!zadatel->jeZabrana()){
+                cout << "--------------------------------------------------------" << endl;
+                cout << "Time: " << Time << endl;
+                cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"<< endl;
+                cout << "--------------------------------------------------------" << endl;
+                cout << endl;
 
-            Traktor::VytvorPozadavek(zadatel);
+                Traktor::VytvorPozadavek(zadatel);
+
+            }
         }
     }
 }
 
 void Traktor::VytvorPozadavek(Mlaticka *mlaticka) {
     Traktor::pozadavky.push_back(mlaticka);
+}
+
+void Traktor::PridejZaznam() {
+    cas.push_back(Time);
+    naplneni.push_back(kapacita->Used());
+}
+
+void Traktor::PrintZaznamy() {
+    ofstream myfile;
+    string jmeno = "traktor" + to_string(this->id) + ".dat";
+    myfile.open(jmeno);
+    for(unsigned int i = 0;this->cas.size() > i; i++){
+        myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
+    }
+    myfile.close();
 }
