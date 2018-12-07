@@ -52,10 +52,11 @@ Hektar* Mlaticka::VybratHektar() {
 
 void Mlaticka::PoznitHektar(Hektar *hektar) {
     while(!hektar->Empty()) {
+        PridejZaznamPrace(true);
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         Enter(*kapacita, 1);        // pridani do vlastni kapacity
-        PridejZaznam();             //pridani zaznamu o zmene kapacity
+        PridejZaznamKapacita();             //pridani zaznamu o zmene kapacity
 
         // pokud je kapacita nad threshold, volam traktor
         if(kapacita->Used() >= kapacita->Capacity() * MINIMALNI_KAPACITA) {
@@ -71,7 +72,11 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
             cout << endl;
 
             this->stop = true;
+            PridejZaznamPrace(true);
+            PridejZaznamPrace(false);
             this->Passivate();
+            PridejZaznamPrace(false);
+            PridejZaznamPrace(true);
         }
     }
 }
@@ -93,9 +98,13 @@ bool Mlaticka::jeZabrana() {
     return zabrana;
 }
 
-void Mlaticka::PridejZaznam() {
+void Mlaticka::PridejZaznamKapacita() {
     cas.push_back(Time);
     naplneni.push_back(kapacita->Used());
+}
+void Mlaticka::PridejZaznamPrace(bool pracuji) {
+    cas2.push_back(Time);
+    prace.push_back(pracuji);
 }
 
 void Mlaticka::PrintZaznamy() {
@@ -104,6 +113,13 @@ void Mlaticka::PrintZaznamy() {
     myfile.open(jmeno);
     for(unsigned int i = 0;this->cas.size() > i; i++){
         myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
+    }
+    myfile.close();
+
+    jmeno = "mlatickaPrace" + to_string(this->id) + ".dat";
+    myfile.open(jmeno);
+    for(unsigned int i = 0;this->cas2.size() > i; i++){
+        myfile << this->cas2[i] << " " <<this->prace[i] << endl;
     }
     myfile.close();
 }

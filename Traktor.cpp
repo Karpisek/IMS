@@ -91,11 +91,11 @@ int Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     mlaticka->Zaber();
 
     int pred = kapacita->Used();
-    mlaticka->PridejZaznam();
+    mlaticka->PridejZaznamKapacita();
     PridejZaznam();
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
         mlaticka->kapacita->Leave(1);
-        mlaticka->PridejZaznam();
+        mlaticka->PridejZaznamKapacita();
         Enter(*kapacita, 1);
         PridejZaznam();
 

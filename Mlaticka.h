@@ -28,6 +28,12 @@ private:
     vector<double> cas;     //cas zmeni naplneni
     vector<int> naplneni;   //aktualni naplneni
 
+
+    vector<double> cas2;     //cas zmeni naplneni
+    vector<int> prace;   //aktualni naplneni
+
+
+
 public:
     static list<Mlaticka *> vse;
     bool stop;
@@ -43,7 +49,8 @@ public:
     void Zaber();
     void Uvolni();
     bool jeZabrana();
-    void PridejZaznam();
+    void PridejZaznamKapacita();
+    void PridejZaznamPrace(bool pracuji);
     void PrintZaznamy();
 };
 
