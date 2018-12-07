@@ -36,7 +36,7 @@ void Mlaticka::Behavior() {
     }
 
     Mlaticka::vse.remove(this);
-    //this->PrintZaznamy();
+    this->PrintZaznamy();
     this->Terminate();
 }
 

@@ -150,8 +150,8 @@ void Traktor::VyprazdniTraktor() {
         Leave(*kapacita, 1);
         PridejZaznam();
 
-        // doba vykladky trva 0.75 minut
-        Wait(0.75);
+        // doba vykladky trva 0.075 minut
+        Wait(0.075);
     }
 
     vykladka->Leave(1);
