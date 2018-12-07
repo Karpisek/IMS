@@ -17,26 +17,29 @@ Mlaticka::Mlaticka(int id) {
 }
 
 void Mlaticka::Behavior() {
-    while(Hektar::vse.size() > 0) {
+    while(!Hektar::vse.empty()) {
         Hektar *hektar = VybratHektar();
         PoznitHektar(hektar);
     }
 
     // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
-    while(kapacita->Used() > 0) {
+    if(kapacita->Used() > 0) {
+        Traktor::PriradTraktor(this);
+
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
         cout << "Mlaticka (" << id << ") ceka na vyprazdneni, pred koncem [" << kapacita->Used() << "]" << endl;
         cout << "--------------------------------------------------------" << endl;
         cout << endl;
+    }
 
-        Traktor::PriradTraktor(this);
+    while(kapacita->Used() > 0) {
         this->stop = true;
         this->Passivate();
     }
 
     Mlaticka::vse.remove(this);
-    //this->PrintZaznamy();
+    this->PrintZaznamy();
     this->Terminate();
 }
 
@@ -53,6 +56,7 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         Enter(*kapacita, 1);        // pridani do vlastni kapacity
         PridejZaznam();             //pridani zaznamu o zmene kapacity
+
         // pokud je kapacita nad threshold, volam traktor
         if(kapacita->Used() >= kapacita->Capacity() * MINIMALNI_KAPACITA) {
             Traktor::PriradTraktor(this);

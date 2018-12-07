@@ -4,6 +4,8 @@
 
 #include "Traktor.h"
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
     this->kapacita = new Store(KAPACITA_TRAKTORU);
     this->id = id;
@@ -20,7 +22,6 @@ void Traktor::Behavior() {
 
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
-        cout << ") vyklada Mlaticku (" << mlaticka->id << endl;
         cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
         cout << "pred:" << endl;
         cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
@@ -32,7 +33,6 @@ void Traktor::Behavior() {
 
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
-        cout << 3 << endl;
         cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
         cout << "po:" << endl;
         cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
@@ -256,3 +256,4 @@ void Traktor::PrintZaznamy() {
     }
     myfile.close();
 }
+#pragma clang diagnostic pop
