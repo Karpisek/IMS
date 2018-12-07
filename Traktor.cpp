@@ -89,6 +89,7 @@ int Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     mlaticka->Zaber();
 
     int pred = kapacita->Used();
+    mlaticka->PridejZaznam();
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
         mlaticka->kapacita->Leave(1);
         cout << "odtud"<< endl;
