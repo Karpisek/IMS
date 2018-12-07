@@ -11,6 +11,9 @@
 #include <iostream>
 #include "Hektar.h"
 #include "Traktor.h"
+#include <vector>
+#include <string>
+#include <fstream>
 
 using namespace std;
 
@@ -22,10 +25,11 @@ class Mlaticka: public Process {
 
 private:
     bool zabrana;
+    vector<double> cas;     //cas zmeni naplneni
+    vector<int> naplneni;   //aktualni naplneni
 
 public:
     static list<Mlaticka *> vse;
-
     bool stop;
     Store *kapacita;     // vnitrni kapacita
     int id;
@@ -39,6 +43,8 @@ public:
     void Zaber();
     void Uvolni();
     bool jeZabrana();
+    void PridejZaznam();
+    void PrintZaznamy();
 };
 
 #endif //MLATICKA_MLATICKA_H

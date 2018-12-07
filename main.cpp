@@ -23,7 +23,11 @@ list<Mlaticka *> Mlaticka::vse;
 list<Traktor *> Traktor::vse;
 list<Mlaticka *> Traktor::pozadavky;
 
+
+
 int main(int argc, char **argv) {
+    list<Traktor *> listTraktoru;
+    list<Mlaticka *> listMlaticek;
 
     Init(0, 15000);
     SetStep(0.001);
@@ -56,7 +60,10 @@ int main(int argc, char **argv) {
     // vytvareni traktoru
     for(int x=0; x < pocetTraktoru ; x++) {
         new Traktor(x, vzdalenost, &vykladka, &silo);
+
     }
+
+
 
     Run();
 }

@@ -23,7 +23,7 @@ void Mlaticka::Behavior() {
     }
 
     // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
-    if(kapacita->Used() > 0) {
+    while(kapacita->Used() > 0) {
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
         cout << "Mlaticka (" << id << ") ceka na vyprazdneni, pred koncem [" << kapacita->Used() << "]" << endl;
@@ -36,6 +36,8 @@ void Mlaticka::Behavior() {
     }
 
     Mlaticka::vse.remove(this);
+    cout << id << endl;
+    this->PrintZaznamy();
     this->Terminate();
 }
 
@@ -51,7 +53,7 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         Enter(*kapacita, 1);        // pridani do vlastni kapacity
-
+        PridejZaznam();             //pridani zaznamu o zmene kapacity
         // pokud je kapacita nad threshold, volam traktor
         if(kapacita->Used() >= kapacita->Capacity() * MINIMALNI_KAPACITA) {
             Traktor::PriradTraktor(this);
@@ -86,4 +88,23 @@ void Mlaticka::Uvolni() {
 
 bool Mlaticka::jeZabrana() {
     return zabrana;
+}
+
+void Mlaticka::PridejZaznam() {
+    cout << Time << endl;
+    cas.push_back(Time);
+    cout << "tady ano" << endl;
+    naplneni.push_back(kapacita->Used());
+    cout << "jop" << endl;
+}
+
+void Mlaticka::PrintZaznamy() {
+    ofstream myfile;
+    string jmeno = "mlaticka" + to_string(this->id) + ".dat";
+    myfile.open(jmeno);
+    cout << cas.size() << endl;
+    for(unsigned int i = 0;this->cas.size() > i; i++){
+        myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
+    }
+    myfile.close();
 }
