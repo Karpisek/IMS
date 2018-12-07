@@ -39,6 +39,11 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         Enter(*kapacita, 1);        // pridani do vlastni kapacity
 
+        // pokud je kapacita nad threshold, volam traktor
+        if(kapacita->Used() > kapacita->Capacity() * MINIMALNI_KAPACITA) {
+            Traktor::PriradTraktor(this);
+        }
+
         if(kapacita->Full()) {
             cout << "Mlaticka " << id << " je plna v: " << Time << endl;
             this->stop = true;

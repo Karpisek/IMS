@@ -10,48 +10,33 @@ Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
     this->vzdalenost = vzdalenost;
     this->vykladka = vykladka;
     this->silo = silo;
-
-    this->Activate();
+    this->volny = true;
 
     Traktor::vse.push_back(this);
 }
 
-void Traktor::NaplnTraktor() {
-    while(!kapacita->Full() && Mlaticka::vse.size() != 0) {
-        // dokud neni traktor plny
+void Traktor::Behavior() {
+    while (true) {
+        Zaber();
 
-        // nalezeni nejplnejsi mlaticky co splnuje minimalni threshold
-        Mlaticka *mlaticka = VybratMlaticku();
         VylozMlaticku(mlaticka);
 
-        Wait(0.01);
+        // pokud je traktor plny, odjizdim, jinak uvolnim
+        if(kapacita->Full()) {
+            Transport();
+            VyprazdniTraktor();
+            Transport();
+        }
+
+        Uvolni();
+        Passivate();
     }
-}
-
-void Traktor::Behavior() {
-    while(Mlaticka::vse.size() > 0) {
-
-        // postupne plneni traktoru
-        NaplnTraktor();
-
-        // transport k silum
-        Transport();
-
-        // vyprazdneni
-        VyprazdniTraktor();
-
-        // transport zpet na pole
-        Transport();
-    }
-
-    Traktor::vse.remove(this);
-    this->Terminate();
 }
 
 Mlaticka* Traktor::VybratMlaticku() {
     Mlaticka *vybrana = nullptr;
 
-    for (auto const& aktualni: Mlaticka::vse) {
+    for (auto const& aktualni: pozadavky) {
 
         // pokud je mlaticka jiz obsluhovana preskocime
         if(aktualni->jeZabrana()) {
@@ -74,7 +59,7 @@ Mlaticka* Traktor::VybratMlaticku() {
             vybrana = aktualni;
         }
 
-            // jinak bereme pouze pokud je vice zaplnena
+        // jinak bereme pouze pokud je vice zaplnena
         else if(vybrana->kapacita->Used() < aktualni->kapacita->Used()) {
             vybrana = aktualni;
         }
@@ -135,4 +120,66 @@ void Traktor::VyprazdniTraktor() {
     vykladka->Leave(1);
 
     cout << "nakladak " << id << " doba vykladani " << Time - zacatekVykladani << endl;
+}
+
+bool Traktor::jeVolny() {
+    return this->volny;
+}
+
+void Traktor::Zaber() {
+    this->volny = false;
+}
+
+void Traktor::Uvolni() {
+
+    // pri uvolneni traktoru existuje min. jedna mlaticka ktera je mozna na vylozeni
+    if(Traktor::pozadavky.size() > 0) {
+        Mlaticka *mlaticka = VybratMlaticku();
+        PriradMlaticku(mlaticka);
+        Activate();
+    }
+
+    this->volny = true;
+}
+
+void Traktor::PriradMlaticku(Mlaticka *mlaticka) {
+    this->mlaticka = mlaticka;
+}
+
+void Traktor::PriradTraktor(Mlaticka* zadatel) {
+    Traktor *vybran = nullptr;
+
+    for (auto const& aktualni: Traktor::vse) {
+
+        // pokud je traktor jiz zabran preskocime
+        if(!aktualni->jeVolny()) {
+            continue;
+        }
+
+        // pokud je doposud nevybrana, bereme vse
+        if(vybran == nullptr) {
+            vybran = aktualni;
+        }
+
+        // jinak bereme pouze pokud je vice zaplnena
+        else if(vybran->kapacita->Used() < aktualni->kapacita->Used()) {
+            vybran = aktualni;
+        }
+    }
+
+    // pokud je nejaky volny traktor, je zvolen nejplnejsi a prirazen dane malticce
+    if(vybran != nullptr) {
+        vybran->PriradMlaticku(zadatel);
+        vybran->Activate();
+    }
+
+    // pokud zadny traktro neni volny, je mlaticka pridana na seznam pozadavku, jakmile se nejaky traktor vrati, odbavi ji
+    else {
+        Traktor::VytvorPozadavek(zadatel);
+    }
+
+}
+
+void Traktor::VytvorPozadavek(Mlaticka *mlaticka) {
+    Traktor::pozadavky.push_back(mlaticka);
 }

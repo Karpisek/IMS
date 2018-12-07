@@ -10,6 +10,7 @@
 #include "macros.h"
 #include <iostream>
 #include "Hektar.h"
+#include "Traktor.h"
 
 using namespace std;
 

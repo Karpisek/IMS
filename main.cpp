@@ -21,6 +21,7 @@ using namespace std;
 list<Hektar *> Hektar::vse;
 list<Mlaticka *> Mlaticka::vse;
 list<Traktor *> Traktor::vse;
+list<Mlaticka *> Traktor::pozadavky;
 
 int main(int argc, char **argv) {
 

@@ -6,12 +6,12 @@
 #define MLATICKA_NAKLADAK_H
 
 #include "simlib.h"
-#include "Mlaticka.h"
 #include "macros.h"
 #include <iostream>
 #include <list>
 #include "Vykladka.h"
 #include "Silo.h"
+#include "Mlaticka.h"
 
 using namespace std;
 
@@ -25,8 +25,13 @@ private:
     Silo *silo;
     int vzdalenost;
 
+    Mlaticka *mlaticka;
+    bool volny;
+
 public:
-    static list<Traktor *> vse;
+    static list<Traktor *> vse;         // list vsech traktoru
+    static list<Mlaticka *> pozadavky;  // list pozadavku
+
     Store *kapacita;     // vnitrni kapacita
     int id;
 
@@ -37,6 +42,15 @@ public:
     void Transport();
     void VyprazdniTraktor();
     void Behavior();
+
+    void PriradMlaticku(Mlaticka *mlaticka);
+
+    void Zaber();
+    void Uvolni();
+    bool jeVolny();
+
+    static void PriradTraktor(Mlaticka *mlaticka);
+    static void VytvorPozadavek(Mlaticka *mlaticka);
 };
 
 
