@@ -80,5 +80,4 @@ void Vykladka::PrintZaznamy() {
         myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
     }
     myfile.close();
-
 }

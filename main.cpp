@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
 
     (void) argc;
 
-    if(argc < 7) {
+    if(argc < 6) {
         cout << "Struktura parametru: [rozloha pole (ha)] [vzdalenost stredu pole (m) ][pocet mlaticek] [pocet traktoru N] [vzdalenost zavodu (km)] N * [kapacita traktoru (t)]" << endl;
         exit(0);
     }
@@ -47,6 +47,11 @@ int main(int argc, char **argv) {
     int pocetMlaticek = atoi(argv[3]);
     int pocetTraktoru = atoi(argv[4]);
     vzdalenost = atoi(argv[5]);
+
+    if(argc < pocetTraktoru + 6) {
+        cout << "kapacity pro nakladaky nejsou urceny pro vsechny" << endl;
+        exit(0);
+    }
 
     vector<int> kapacity;
     for(int i = 0; i < pocetTraktoru; i++) {
