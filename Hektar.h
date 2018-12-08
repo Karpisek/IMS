@@ -15,6 +15,7 @@ using namespace std;
 class Hektar: public Kapacita {
 public:
     static list<Hektar *> vse;
+    static int zbyvajiciVynos;
 
     double doba;    //  doba sklizne sto-kilogramu v sekundach
 

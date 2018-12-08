@@ -27,6 +27,8 @@ int vzdalenost;
 
 int main(int argc, char **argv) {
 
+    (void) argc;
+
     if(argc != 6) {
         cout << "Struktura parametru: [rozloha pole (ha)] [pocet mlaticek] [pocet traktoru] [kapacita traktoru (t)] [vzdalenost zavodu (km)] " << endl;
         exit(0);

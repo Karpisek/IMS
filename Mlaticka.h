@@ -39,6 +39,8 @@ private:
 
 public:
     static list<Mlaticka *> vse;
+    static int celkovyUchovanyVynos;
+
     bool stop;
     Kapacita *kapacita;     // vnitrni kapacita
     int id;

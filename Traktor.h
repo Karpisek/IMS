@@ -32,6 +32,7 @@ public:
     vector<int> naplneni;
     static list<Traktor *> vse;         // list vsech traktoru
     static list<Mlaticka *> pozadavky;  // list pozadavku
+    static int teoratickaKapacita;
 
     Kapacita *kapacita;     // vnitrni kapacita
     int id;

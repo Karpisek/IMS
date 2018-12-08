@@ -4,6 +4,8 @@
 
 #include "Mlaticka.h"
 
+int Mlaticka::celkovyUchovanyVynos = 0;
+
 Mlaticka::Mlaticka(int id) {
     this->kapacita = new Kapacita(KAPACITA_MLATICKY);
     this->id = id;
@@ -61,6 +63,10 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         kapacita->Enter(1);        // pridani do vlastni kapacity
+
+        Mlaticka::celkovyUchovanyVynos++;
+        Hektar::zbyvajiciVynos--;
+
         PridejZaznamKapacita();             //pridani zaznamu o zmene kapacity
 
         // pokud je kapacita nad threshold, volam traktor
