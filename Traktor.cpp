@@ -140,10 +140,8 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
     mlaticka->Zaber();
 
-    cout << "sdsad" << endl;
     // presun nakladak k mlaticce
     Transport(Uniform((double) 0.0, stredPole), TRAKTOR_POLE_RYCHLOST);
-    cout << "sdsad" << endl;
 
     // pridej zaznam aktualniho stavu mlaticky a nakladaku
     mlaticka->PridejZaznamKapacita();
@@ -210,10 +208,11 @@ void Traktor::VyprazdniTraktor() {
     Wait(0.28);
 
     // dokud neni nakladak prazdny, vykladej (naklopi korbu a vse vypadne)
-    while (!kapacita->Empty()) {
-        vykladka->kapacita->Enter(1);
+    if (!kapacita->Empty()) {
         vykladka->PridejZaznamKapacita();
-        kapacita->Leave(1);
+        vykladka->kapacita->Enter(kapacita->Used());
+        vykladka->PridejZaznamKapacita();
+        kapacita->Leave(kapacita->Used());
 
         PridejZaznamKapacita();
     }

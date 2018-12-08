@@ -72,7 +72,6 @@ void Vykladka::PridejZaznamKapacita(){
 }
 
 
-
 void Vykladka::PrintZaznamy() {
     ofstream myfile;
     string jmeno = "vykladka.dat";
