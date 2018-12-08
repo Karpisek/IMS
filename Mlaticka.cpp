@@ -38,13 +38,14 @@ void Mlaticka::Behavior() {
         cout << endl;
     }
 
-
     PridejZaznamPrace(true);
     PridejZaznamPrace(false);
+
     while(kapacita->Used() > 0) {
         this->stop = true;
         this->Passivate();
     }
+
     PridejZaznamPrace(false);
     PridejZaznamPrace(true);
 

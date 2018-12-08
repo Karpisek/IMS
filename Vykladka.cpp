@@ -53,7 +53,6 @@ void Vykladka::ZaberMisto(Traktor *traktor) {
 }
 
 void Vykladka::Uvolni() {
-
     // pokud je fronta na vykladku prazdna nebo neni dostatek kapacity na vylozeni, pridej misto
     if(fronta.empty() || fronta.front()->kapacita->Used() > kapacita->Free()) {
         this->mistaNaVykladku->Enter(1);

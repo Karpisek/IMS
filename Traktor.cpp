@@ -30,14 +30,6 @@ void Traktor::Behavior() {
 
     while (true) {
 
-        cout << "--------------------------------------------------------" << endl;
-        cout << "Time: " << Time << endl;
-        cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
-        cout << "pred:" << endl;
-        cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
-        cout << "\t Mlaticka [" << mlaticka->kapacita->Used() << "/" << mlaticka->kapacita->Capacity() << "]" << endl;
-        cout << endl;
-
         VylozMlaticku(mlaticka);
 
         cout << "--------------------------------------------------------" << endl;
@@ -78,16 +70,16 @@ void Traktor::Behavior() {
         }
 
         // pokud traktor neni plny, ale jiz nejsou zadne mlaticky v provozu, jedna se o konec smeny
-        else if(Mlaticka::vse.empty()) {
+        else if(Traktor::pozadavky.empty() && Mlaticka::vse.empty()) {
+
             // presun z pole na silnic
             Transport(Uniform(0, stredPole), TRAKTOR_POLE_RYCHLOST);
 
             // presun k vykladce
             Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+
             VyprazdniTraktor();
-
             Traktor::vse.remove(this);
-
 
             PridejZaznamPrace(true);
             PridejZaznamPrace(false);
@@ -142,6 +134,14 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
 
     // presun nakladak k mlaticce
     Transport(Uniform((double) 0.0, stredPole), TRAKTOR_POLE_RYCHLOST);
+
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Traktor (" << id << ") vyklada Mlaticku (" << mlaticka->id << "):" << endl;
+    cout << "pred:" << endl;
+    cout << "\t Traktor [" << kapacita->Used() << "/" << kapacita->Capacity() << "]" << endl;
+    cout << "\t Mlaticka [" << mlaticka->kapacita->Used() << "/" << mlaticka->kapacita->Capacity() << "]" << endl;
+    cout << endl;
 
     // pridej zaznam aktualniho stavu mlaticky a nakladaku
     mlaticka->PridejZaznamKapacita();
@@ -216,7 +216,6 @@ void Traktor::VyprazdniTraktor() {
 
         PridejZaznamKapacita();
     }
-
     // vraceni korby nakladaku trva 0.28 minuty
     Wait(0.28);
 
