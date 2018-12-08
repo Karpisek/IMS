@@ -15,6 +15,8 @@ Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
 
     Traktor::teoratickaKapacita += this->kapacita->Capacity();
 
+
+    cout << "CAPACITY: " << Traktor::teoratickaKapacita << endl;
     Traktor::vse.push_back(this);
     Activate();
 }
@@ -54,12 +56,15 @@ void Traktor::Behavior() {
             // staci na zbyvajici vynos na poli a v mlatickach
             // todo: otestovat jestli funguje jak ma, pripadne mu tam pridat chybu, aby nebyl v odhadovani kolik
             // todo: zbyva jeste na poli tak presny !
-            if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) < Traktor::teoratickaKapacita) {
+
+//            cout << id << " -> " << (Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) << " " << Traktor::teoratickaKapacita;
+            if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= Traktor::teoratickaKapacita) {
                 Traktor::vse.remove(this);
 
                 PridejZaznamPrace(true);
                 PridejZaznamPrace(false);
                 PrintZaznamy();
+
                 Terminate();
             }
 
@@ -69,7 +74,9 @@ void Traktor::Behavior() {
         }
 
         // pokud traktor neni plny, ale jiz nejsou zadne mlaticky v provozu, jedna se o konec smeny
-        else if(Traktor::pozadavky.empty() && Mlaticka::vse.empty()) {
+        else if(Traktor::pozadavky.empty() && Mlaticka::vse.empty() && (Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= Traktor::teoratickaKapacita - kapacita->Free()) {
+
+            Traktor::teoratickaKapacita -= kapacita->Free();
 
             // presun z pole na silnic
             Transport(Uniform(0, stredPole), TRAKTOR_POLE_RYCHLOST);
@@ -83,6 +90,7 @@ void Traktor::Behavior() {
             PridejZaznamPrace(true);
             PridejZaznamPrace(false);
             PrintZaznamy();
+
             Terminate();
         }
 
@@ -242,24 +250,40 @@ void Traktor::Uvolni() {
 
         // sice pozadavky existuji, ale jiz jsou obsluhovany -> konec smeny
         if(mlaticka == nullptr) {
-            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+            if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= (Traktor::teoratickaKapacita - kapacita->Free())) {
+                Traktor::teoratickaKapacita -= kapacita->Free();
 
-            Traktor::vse.remove(this);
+                Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
 
-            PrintZaznamy();
-            Terminate();
+                Traktor::vse.remove(this);
+
+                PrintZaznamy();
+
+                Terminate();
+            }
+            else {
+                volny = true;
+                PridejZaznamPrace(true);
+                PridejZaznamPrace(false);
+                Passivate();
+                PridejZaznamPrace(false);
+                PridejZaznamPrace(true);
+            }
         }
 
         PriradMlaticku(mlaticka);
     }
 
     // v pripade, ze jiz nejsou dalsi mlaticky konec smeny
-    else if(Mlaticka::vse.empty()) {
+    else if(Mlaticka::vse.empty() && ((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= (Traktor::teoratickaKapacita - kapacita->Free()))) {
+        Traktor::teoratickaKapacita -= kapacita->Free();
+
         Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
 
         Traktor::vse.remove(this);
 
         PrintZaznamy();
+
         Terminate();
     }
 
@@ -316,7 +340,7 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
         bool zadano = (find(Traktor::pozadavky.begin(), Traktor::pozadavky.end(), zadatel) != Traktor::pozadavky.end());
 
         if(!zadano) {
-            if(!zadatel->jeZabrana()) {
+//            if(!zadatel->jeZabrana()) {
                 cout << "--------------------------------------------------------" << endl;
                 cout << "Time: " << Time << endl;
                 cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"
@@ -324,7 +348,7 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
                 cout << "--------------------------------------------------------" << endl;
                 cout << endl;
                 Traktor::VytvorPozadavek(zadatel);
-            }
+//            }
         }
     }
 }
