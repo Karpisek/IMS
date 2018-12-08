@@ -196,14 +196,15 @@ void Traktor::VyprazdniTraktor() {
 
     // dokud neni nakladak prazdny, vykladej
     while (!kapacita->Empty()) {
-        vykladka->kapacita->Enter(1);
         vykladka->PridejZaznamKapacita();
-        kapacita->Leave(1);
+        vykladka->kapacita->Enter(kapacita->Used());
+        vykladka->PridejZaznamKapacita();
+        kapacita->Leave(kapacita->Used());
 
         PridejZaznamKapacita();
 
         // doba vykladky jednoho sto-kilogramu trva 0.075 minut
-        Wait(0.075);
+        //Wait(0.075);
     }
 
     // vraceni korby nakladaku trva 0.28 minuty
