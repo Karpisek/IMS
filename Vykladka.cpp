@@ -14,11 +14,13 @@ Vykladka::Vykladka() {
 void Vykladka::Behavior() {
     if(!kapacita->Empty()) {
         kapacita->Leave(1);
+        PridejZaznamKapacita();
     }
 
     // v pripade, ze neni prazdna fronta a nejsou plna mista, tak kontrola jeslti se dalsi nakladak dokaze vyprazdnit
     if(!fronta.empty() && !mistaNaVykladku->Empty()) {
         if(fronta.front()->kapacita->Used() <= kapacita->Free()) {
+            PridejZaznamKapacita();
             mistaNaVykladku->Leave(1);
             fronta.front()->Activate();
             fronta.pop_front();
@@ -62,4 +64,22 @@ void Vykladka::Uvolni() {
         fronta.front()->Activate();
         fronta.pop_front();
     }
+}
+
+void Vykladka::PridejZaznamKapacita(){
+    cas.push_back(Time);
+    naplneni.push_back(kapacita->Used());
+}
+
+
+
+void Vykladka::PrintZaznamy() {
+    ofstream myfile;
+    string jmeno = "vykladka.dat";
+    myfile.open(jmeno);
+    for(unsigned int i = 0;this->cas.size() > i; i++){
+        myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
+    }
+    myfile.close();
+
 }

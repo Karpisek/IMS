@@ -22,6 +22,7 @@ Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 void Traktor::Behavior() {
+    PridejZaznamPrace(true);
     // dorazi na misto urceni a ceka na dalsi akci
     Transport(vzdalenost);
     Uvolni();
@@ -59,6 +60,8 @@ void Traktor::Behavior() {
             if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) < Traktor::teoratickaKapacita) {
                 Traktor::vse.remove(this);
 
+                PridejZaznamPrace(true);
+                PridejZaznamPrace(false);
                 PrintZaznamy();
                 Terminate();
             }
@@ -75,6 +78,9 @@ void Traktor::Behavior() {
 
             Traktor::vse.remove(this);
 
+
+            PridejZaznamPrace(true);
+            PridejZaznamPrace(false);
             PrintZaznamy();
             Terminate();
         }
@@ -126,7 +132,7 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
 
     // pridej zaznam aktualniho stavu mlaticky a nakladaku
     mlaticka->PridejZaznamKapacita();
-    PridejZaznam();
+    PridejZaznamKapacita();
 
     // dokud neni nakladak plny nebo mlaticka prazdna provadej transfer
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
@@ -141,7 +147,7 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
         Traktor::teoratickaKapacita--;
         Mlaticka::celkovyUchovanyVynos--;
 
-        PridejZaznam();
+        PridejZaznamKapacita();
 
         if(mlaticka->stop) {
             mlaticka->Activate();
@@ -183,7 +189,7 @@ void Traktor::VyprazdniTraktor() {
     cout << "--------------------------------------------------------" << endl;
     cout << endl;
 
-    PridejZaznam();
+    PridejZaznamKapacita();
 
     // zvednuti korby nakladaku trva 0.28 minuty
     Wait(0.28);
@@ -191,9 +197,10 @@ void Traktor::VyprazdniTraktor() {
     // dokud neni nakladak prazdny, vykladej
     while (!kapacita->Empty()) {
         vykladka->kapacita->Enter(1);
+        vykladka->PridejZaznamKapacita();
         kapacita->Leave(1);
 
-        PridejZaznam();
+        PridejZaznamKapacita();
 
         // doba vykladky jednoho sto-kilogramu trva 0.075 minut
         Wait(0.075);
@@ -240,7 +247,11 @@ void Traktor::Uvolni() {
 
     else {
         volny = true;
+        PridejZaznamPrace(true);
+        PridejZaznamPrace(false);
         Passivate();
+        PridejZaznamPrace(false);
+        PridejZaznamPrace(true);
     }
 }
 

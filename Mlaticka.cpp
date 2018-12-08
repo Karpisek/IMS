@@ -18,7 +18,7 @@ Mlaticka::Mlaticka(int id) {
 }
 
 void Mlaticka::Behavior() {
-
+    PridejZaznamPrace(true);
     Transport(vzdalenost);
 
     while(!Hektar::vse.empty()) {
@@ -38,14 +38,21 @@ void Mlaticka::Behavior() {
         cout << endl;
     }
 
+
+    PridejZaznamPrace(true);
+    PridejZaznamPrace(false);
     while(kapacita->Used() > 0) {
         this->stop = true;
         this->Passivate();
     }
+    PridejZaznamPrace(false);
+    PridejZaznamPrace(true);
 
     // presun do zavodu
     Transport(vzdalenost);
 
+    PridejZaznamPrace(true);
+    PridejZaznamPrace(false);
     PrintZaznamy();
     Terminate();
 }
@@ -59,7 +66,7 @@ Hektar* Mlaticka::VybratHektar() {
 
 void Mlaticka::PoznitHektar(Hektar *hektar) {
     while(!hektar->Empty()) {
-        PridejZaznamPrace(true);
+        //PridejZaznamPrace(true);
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         kapacita->Enter(1);        // pridani do vlastni kapacity
