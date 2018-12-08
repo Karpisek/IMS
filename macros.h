@@ -9,7 +9,7 @@
 #define METRY_NA_KM 1000
 
 #define KAPACITA_TRAKTORU 120   // ve sto-kilogramech
-#define KAPACITA_MLATICKY 80    // ve sto-kilogramech
+#define KAPACITA_MLATICKY 78    // ve sto-kilogramech
 #define MINIMALNI_KAPACITA 0.5  // 0...1 minimalni kapacita pro vyprazdneni
 
 #define MIST_NA_VYLOZENI 2
