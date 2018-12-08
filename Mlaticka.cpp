@@ -26,22 +26,18 @@ void Mlaticka::Behavior() {
         PoznitHektar(hektar);
     }
 
-    // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
-    if(kapacita->Used() > 0) {
-        Mlaticka::vse.remove(this);
-        Traktor::PriradTraktor(this);
-
-        cout << "--------------------------------------------------------" << endl;
-        cout << "Time: " << Time << endl;
-        cout << "Mlaticka (" << id << ") ceka na vyprazdneni, pred koncem [" << kapacita->Used() << "]" << endl;
-        cout << "--------------------------------------------------------" << endl;
-        cout << endl;
-    }
-
     PridejZaznamPrace(true);
     PridejZaznamPrace(false);
 
+    cout << "--------------------------------------------------------" << endl;
+    cout << "Time: " << Time << endl;
+    cout << "Mlaticka (" << id << ") ceka na vyprazdneni, pred koncem [" << kapacita->Used() << "]" << endl;
+    cout << "--------------------------------------------------------" << endl;
+    cout << endl;
+
+    // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
     while(kapacita->Used() > 0) {
+        Mlaticka::vse.remove(this);
         this->stop = true;
         Traktor::PriradTraktor(this);
         this->Passivate();

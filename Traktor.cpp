@@ -29,7 +29,6 @@ void Traktor::Behavior() {
     Uvolni();
 
     while (true) {
-
         VylozMlaticku(mlaticka);
 
         cout << "--------------------------------------------------------" << endl;
@@ -124,14 +123,12 @@ Mlaticka* Traktor::VybratMlaticku() {
     if(vybrana != nullptr) {
         Traktor::pozadavky.remove(vybrana);
     }
+
     return vybrana;
 
 }
 
 void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
-    // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
-    mlaticka->Zaber();
-
     // presun nakladak k mlaticce
     Transport(Uniform((double) 0.0, stredPole), TRAKTOR_POLE_RYCHLOST);
 
@@ -242,6 +239,17 @@ void Traktor::Uvolni() {
     // pri uvolneni traktoru existuje min. jedna mlaticka ktera je mozna na vylozeni
     if(!Traktor::pozadavky.empty()) {
         Mlaticka *mlaticka = VybratMlaticku();
+
+        // sice pozadavky existuji, ale jiz jsou obsluhovany -> konec smeny
+        if(mlaticka == nullptr) {
+            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+
+            Traktor::vse.remove(this);
+
+            PrintZaznamy();
+            Terminate();
+        }
+
         PriradMlaticku(mlaticka);
     }
 
@@ -266,11 +274,18 @@ void Traktor::Uvolni() {
 }
 
 void Traktor::PriradMlaticku(Mlaticka *mlaticka) {
+    // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
+    mlaticka->Zaber();
     this->mlaticka = mlaticka;
 }
 
 void Traktor::PriradTraktor(Mlaticka* zadatel) {
     Traktor *vybran = nullptr;
+
+    // v pripade ze mlaticka zada ale jiz je zabrana traktorem, nevytvori se pozadavek
+    if(zadatel->jeZabrana()) {
+        return;
+    }
 
     for (auto const& aktualni: Traktor::vse) {
 
@@ -292,12 +307,11 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
 
     // pokud je nejaky volny traktor, je zvolen nejplnejsi a prirazen dane malticce
     if(vybran != nullptr) {
-
         vybran->PriradMlaticku(zadatel);
         vybran->Zaber();
     }
 
-    // pokud zadny traktro neni volny, je mlaticka pridana na seznam pozadavku, jakmile se nejaky traktor vrati, odbavi ji
+    // pokud zadny traktor neni volny, je mlaticka pridana na seznam pozadavku, jakmile se nejaky traktor vrati, odbavi ji
     else {
         bool zadano = (find(Traktor::pozadavky.begin(), Traktor::pozadavky.end(), zadatel) != Traktor::pozadavky.end());
 
@@ -309,7 +323,6 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
                      << endl;
                 cout << "--------------------------------------------------------" << endl;
                 cout << endl;
-
                 Traktor::VytvorPozadavek(zadatel);
             }
         }
