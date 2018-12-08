@@ -73,7 +73,7 @@ void Traktor::Behavior() {
             }
 
             // v pripade, ze je na poli jeste dostatek vynosu, vraci se traktor zpet
-            Traktor::teoratickaKapacita += KAPACITA_TRAKTORU;
+            Traktor::teoratickaKapacita += kapacita->Capacity();
             Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
         }
 
