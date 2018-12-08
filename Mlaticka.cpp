@@ -43,6 +43,7 @@ void Mlaticka::Behavior() {
 
     while(kapacita->Used() > 0) {
         this->stop = true;
+        Traktor::PriradTraktor(this);
         this->Passivate();
     }
 
