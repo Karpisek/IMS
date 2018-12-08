@@ -14,11 +14,14 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include "Kapacita.h"
 
 using namespace std;
 
 class Traktor;
 class Hektar;
+
+extern int vzdalenost;
 
 class Mlaticka: public Process {
     using Process::Activate;
@@ -36,12 +39,14 @@ private:
 
 public:
     static list<Mlaticka *> vse;
+    static int celkovyUchovanyVynos;
+
     bool stop;
-    Store *kapacita;     // vnitrni kapacita
+    Kapacita *kapacita;     // vnitrni kapacita
     int id;
 
-    Mlaticka(int id);
-    void Behavior();
+    explicit Mlaticka(int id);
+    void Behavior() override;
     void Activate();
 
     Hektar* VybratHektar();
@@ -52,6 +57,7 @@ public:
     void PridejZaznamKapacita();
     void PridejZaznamPrace(bool pracuji);
     void PrintZaznamy();
+    void Transport(double vzdalenost);
 };
 
 #endif //MLATICKA_MLATICKA_H

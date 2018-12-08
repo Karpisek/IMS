@@ -7,15 +7,16 @@
 
 #include "simlib.h"
 #include <list>
+#include "Kapacita.h"
 
 using namespace std;
 
 // TODO mozno deditm se store -> output();
-class Hektar: public Store {
+class Hektar: public Kapacita {
 public:
     static list<Hektar *> vse;
+    static int zbyvajiciVynos;
 
-    int vynos;      //  v sto-kilogramech
     double doba;    //  doba sklizne sto-kilogramu v sekundach
 
     Hektar();

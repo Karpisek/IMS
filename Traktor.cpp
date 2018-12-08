@@ -4,22 +4,28 @@
 
 #include "Traktor.h"
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
-Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
-    this->kapacita = new Store(KAPACITA_TRAKTORU);
+int Traktor::teoratickaKapacita = 0;
+
+Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
+    this->kapacita = new Kapacita(kapacita * 10);      // nastaveni kapacity pro sto-kilogramy
     this->id = id;
-    this->vzdalenost = vzdalenost;
     this->vykladka = vykladka;
-    this->silo = silo;
-    this->volny = true;
-    PridejZaznamPrace(false);
+
+    this->volny = false;
+
+    Traktor::teoratickaKapacita += this->kapacita->Capacity();
+
     Traktor::vse.push_back(this);
+    Activate();
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wmissing-noreturn"
 void Traktor::Behavior() {
-    PridejZaznamPrace(false);
-    PridejZaznamPrace(true);
+    // dorazi na misto urceni a ceka na dalsi akci
+    Transport(vzdalenost);
+    Uvolni();
+
     while (true) {
 
         cout << "--------------------------------------------------------" << endl;
@@ -30,8 +36,7 @@ void Traktor::Behavior() {
         cout << "\t Mlaticka [" << mlaticka->kapacita->Used() << "/" << mlaticka->kapacita->Capacity() << "]" << endl;
         cout << endl;
 
-        int vylozeno = VylozMlaticku(mlaticka);
-
+        VylozMlaticku(mlaticka);
 
         cout << "--------------------------------------------------------" << endl;
         cout << "Time: " << Time << endl;
@@ -44,14 +49,41 @@ void Traktor::Behavior() {
 
         // pokud je traktor plny, odjizdim, jinak uvolnim
         if(kapacita->Full()) {
-            Transport();
+            Transport(vzdalenost);
             VyprazdniTraktor();
-            Transport();
+
+            // kontrola jestli potencionalni kapacita nakladaku ktere jsou na poli + kteri jiz na pole jedou
+            // staci na zbyvajici vynos na poli a v mlatickach
+            // todo: otestovat jestli funguje jak ma, pripadne mu tam pridat chybu, aby nebyl v odhadovani kolik
+            // todo: zbyva jeste na poli tak presny !
+            if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) < Traktor::teoratickaKapacita) {
+                Traktor::vse.remove(this);
+
+                PrintZaznamy();
+                Terminate();
+            }
+
+            // v pripade, ze je na poli jeste dostatek vynosu, vraci se traktor zpet
+            Traktor::teoratickaKapacita += KAPACITA_TRAKTORU;
+            Transport(vzdalenost);
+        }
+
+        // pokud traktor neni plny, ale jiz nejsou zadne mlaticky v provozu, jedna se o konec smeny
+        else if(Mlaticka::vse.empty()) {
+            Transport(vzdalenost);
+            VyprazdniTraktor();
+
+            Traktor::vse.remove(this);
+
+            PrintZaznamy();
+            Terminate();
         }
 
         Uvolni();
     }
 }
+
+#pragma clang diagnostic pop
 
 Mlaticka* Traktor::VybratMlaticku() {
     Mlaticka *vybrana = nullptr;
@@ -83,40 +115,47 @@ Mlaticka* Traktor::VybratMlaticku() {
     // pokud je mlaticka vybrana, odeber ji z pozadavku
     if(vybrana != nullptr) {
         Traktor::pozadavky.remove(vybrana);
-        //vybrana->Zaber();
     }
     return vybrana;
+
 }
 
-int Traktor::VylozMlaticku(Mlaticka *mlaticka) {
+void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
     mlaticka->Zaber();
 
-    int pred = kapacita->Used();
+    // pridej zaznam aktualniho stavu mlaticky a nakladaku
     mlaticka->PridejZaznamKapacita();
-    PridejZaznamKapacita();
+    PridejZaznam();
+
+    // dokud neni nakladak plny nebo mlaticka prazdna provadej transfer
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
+
+        // vyprazdeni 100kg trva 0.02 minut
+        Wait(0.02);
+
         mlaticka->kapacita->Leave(1);
         mlaticka->PridejZaznamKapacita();
-        Enter(*kapacita, 1);
-        PridejZaznamKapacita();
+        kapacita->Enter(1);
+
+        Traktor::teoratickaKapacita--;
+        Mlaticka::celkovyUchovanyVynos--;
+
+        PridejZaznam();
 
         if(mlaticka->stop) {
             mlaticka->Activate();
         }
-
-        // vyprazdeni 100kg trva 0.02 minut
-        Wait(0.02);
     }
 
+    // po dokonceni vykladky se mlaticka uvolni
     mlaticka->Uvolni();
-
-    return kapacita->Used() - pred;
 }
 
-void Traktor::Transport() {
-    // transport plneho nakladaku, zaokrouhleno na desetiny minuty
-    double dobaCesty = ((int)(Uniform(MIN_DOBA_CESTY, MAX_DOBA_CESTY) * 10 ))/ 10.0 ;
+void Traktor::Transport(double vzdalenost) {
+
+    // transport nakladaku na zadanou vzdalenost
+    double dobaCesty = vzdalenost/(double)TRAKTOR_SILNICE_RYCHLOST * HODINY_NA_MIN;
 
     cout << "--------------------------------------------------------" << endl;
     cout << "Time: " << Time << endl;
@@ -128,17 +167,15 @@ void Traktor::Transport() {
 }
 
 void Traktor::VyprazdniTraktor() {
-    double zacatekVykladani = Time;
-
     cout << "--------------------------------------------------------" << endl;
     cout << "Time: " << Time << endl;
     cout << "Traktor (" << id << ") dorazil k vykladce"<< endl;
-    cout << "\tVykladka ma frontu o velikosti [" << vykladka->queue.size() << "]" << endl;
+    cout << "\tVykladka ma frontu o velikosti [" << vykladka->fronta.size() << "]" << endl;
     cout << "--------------------------------------------------------" << endl;
     cout << endl;
 
     // pokus o zabrani vykladky
-    vykladka->Enter(this, 1);
+    vykladka->ZaberMisto(this);
 
     cout << "--------------------------------------------------------" << endl;
     cout << "Time: " << Time << endl;
@@ -146,18 +183,26 @@ void Traktor::VyprazdniTraktor() {
     cout << "--------------------------------------------------------" << endl;
     cout << endl;
 
-    PridejZaznamKapacita();
-    while (!kapacita->Empty()) {
-        Enter(*silo, 1);
-        Leave(*kapacita, 1);
-        PridejZaznamKapacita();
+    PridejZaznam();
 
-        // doba vykladky trva 0.075 minut
+    // zvednuti korby nakladaku trva 0.28 minuty
+    Wait(0.28);
+
+    // dokud neni nakladak prazdny, vykladej
+    while (!kapacita->Empty()) {
+        vykladka->kapacita->Enter(1);
+        kapacita->Leave(1);
+
+        PridejZaznam();
+
+        // doba vykladky jednoho sto-kilogramu trva 0.075 minut
         Wait(0.075);
     }
 
-    vykladka->Leave(1);
+    // vraceni korby nakladaku trva 0.28 minuty
+    Wait(0.28);
 
+    vykladka->Uvolni();
 }
 
 bool Traktor::jeVolny() {
@@ -178,18 +223,24 @@ void Traktor::Uvolni() {
     cout << endl;
 
     // pri uvolneni traktoru existuje min. jedna mlaticka ktera je mozna na vylozeni
-    if(Traktor::pozadavky.size() > 0) {
+    if(!Traktor::pozadavky.empty()) {
         Mlaticka *mlaticka = VybratMlaticku();
         PriradMlaticku(mlaticka);
 
-    } else {
-        volny = true;
-        PridejZaznamPrace(true);
-        PridejZaznamPrace(false);
+    }
+
+    else if(Mlaticka::vse.empty()) {
+        Transport(vzdalenost);
+
+        Traktor::vse.remove(this);
+
         PrintZaznamy();
+        Terminate();
+    }
+
+    else {
+        volny = true;
         Passivate();
-        PridejZaznamPrace(false);
-        PridejZaznamPrace(true);
     }
 }
 
@@ -230,15 +281,15 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
         bool zadano = (find(Traktor::pozadavky.begin(), Traktor::pozadavky.end(), zadatel) != Traktor::pozadavky.end());
 
         if(!zadano) {
-            if(!zadatel->jeZabrana()){
+            if(!zadatel->jeZabrana()) {
                 cout << "--------------------------------------------------------" << endl;
                 cout << "Time: " << Time << endl;
-                cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"<< endl;
+                cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"
+                     << endl;
                 cout << "--------------------------------------------------------" << endl;
                 cout << endl;
 
                 Traktor::VytvorPozadavek(zadatel);
-
             }
         }
     }
@@ -275,4 +326,3 @@ void Traktor::PrintZaznamy() {
     }
     myfile.close();
 }
-#pragma clang diagnostic pop
