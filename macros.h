@@ -17,7 +17,7 @@
 #define MLATICKA_SILNICE_RYCHLOST   25  // prumerna rychlost mlaticky na silnici km/h
 
 #define TRAKTOR_POLE_RYCHLOST   8      // prumerna rychlost pohybu Traktoru po poli
-#define TRAKTOR_SILNICE_RYCHLOST    35  // prumerna rychlost traktoru na silnici km/h
+#define TRAKTOR_SILNICE_RYCHLOST    34  // prumerna rychlost traktoru na silnici km/h
 
 #define KAPACITA_VYKLADKY   400                 // kapacita zasobniku vykladky ve stokilogramech
 #define RYCHLOST_ODBERU_VYKLADKY   0.075        // rychlost odebirani z mista pro vykladku

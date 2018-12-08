@@ -40,7 +40,7 @@ int main(int argc, char **argv) {
 
     Init(0, 15000);
     SetStep(0.001);
-    RandomSeed(time(nullptr));
+    //RandomSeed(time(nullptr));
 
     int rozloha = atoi(argv[1]);
     stredPole = (double)atoi(argv[2]) / METRY_NA_KM;   // prevod na kilometry
