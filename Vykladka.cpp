@@ -27,7 +27,7 @@ void Vykladka::Behavior() {
         }
     }
 
-    Activate(Time + 0.075);
+    Activate(Time + RYCHLOST_ODBERU_VYKLADKY);
 }
 
 void Vykladka::ZaberMisto(Traktor *traktor) {

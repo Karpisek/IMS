@@ -45,7 +45,7 @@ public:
     Traktor(int id, Vykladka *vykladka, int kapacita);
     Mlaticka* VybratMlaticku();
     void VylozMlaticku(Mlaticka *mlaticka);
-    void Transport(double vzdalenost);
+    void Transport(double vzdalenost, int rychlost);
     void VyprazdniTraktor();
     void Behavior() override;
 

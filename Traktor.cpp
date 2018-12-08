@@ -23,8 +23,9 @@ Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
 void Traktor::Behavior() {
     PridejZaznamPrace(true);
+
     // dorazi na misto urceni a ceka na dalsi akci
-    Transport(vzdalenost);
+    Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
     Uvolni();
 
     while (true) {
@@ -50,7 +51,12 @@ void Traktor::Behavior() {
 
         // pokud je traktor plny, odjizdim, jinak uvolnim
         if(kapacita->Full()) {
-            Transport(vzdalenost);
+
+            // presun z pole na silnic
+            Transport(Uniform(0, stredPole), TRAKTOR_POLE_RYCHLOST);
+
+            // presun po silnici k vykladacimmu mistu
+            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
             VyprazdniTraktor();
 
             // kontrola jestli potencionalni kapacita nakladaku ktere jsou na poli + kteri jiz na pole jedou
@@ -68,12 +74,16 @@ void Traktor::Behavior() {
 
             // v pripade, ze je na poli jeste dostatek vynosu, vraci se traktor zpet
             Traktor::teoratickaKapacita += KAPACITA_TRAKTORU;
-            Transport(vzdalenost);
+            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
         }
 
         // pokud traktor neni plny, ale jiz nejsou zadne mlaticky v provozu, jedna se o konec smeny
         else if(Mlaticka::vse.empty()) {
-            Transport(vzdalenost);
+            // presun z pole na silnic
+            Transport(Uniform(0, stredPole), TRAKTOR_POLE_RYCHLOST);
+
+            // presun k vykladce
+            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
             VyprazdniTraktor();
 
             Traktor::vse.remove(this);
@@ -130,6 +140,11 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     // obsazeni mlaticky nakladakem -> pouze jeden nakladak muze mlaticku vyprazdnovat
     mlaticka->Zaber();
 
+    cout << "sdsad" << endl;
+    // presun nakladak k mlaticce
+    Transport(Uniform((double) 0.0, stredPole), TRAKTOR_POLE_RYCHLOST);
+    cout << "sdsad" << endl;
+
     // pridej zaznam aktualniho stavu mlaticky a nakladaku
     mlaticka->PridejZaznamKapacita();
     PridejZaznamKapacita();
@@ -158,10 +173,10 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     mlaticka->Uvolni();
 }
 
-void Traktor::Transport(double vzdalenost) {
+void Traktor::Transport(double vzdalenost, int rychlost) {
 
     // transport nakladaku na zadanou vzdalenost
-    double dobaCesty = vzdalenost/(double)TRAKTOR_SILNICE_RYCHLOST * HODINY_NA_MIN;
+    double dobaCesty = vzdalenost/(double)rychlost * HODINY_NA_MIN;
 
     cout << "--------------------------------------------------------" << endl;
     cout << "Time: " << Time << endl;
@@ -194,16 +209,13 @@ void Traktor::VyprazdniTraktor() {
     // zvednuti korby nakladaku trva 0.28 minuty
     Wait(0.28);
 
-    // dokud neni nakladak prazdny, vykladej
+    // dokud neni nakladak prazdny, vykladej (naklopi korbu a vse vypadne)
     while (!kapacita->Empty()) {
         vykladka->kapacita->Enter(1);
         vykladka->PridejZaznamKapacita();
         kapacita->Leave(1);
 
         PridejZaznamKapacita();
-
-        // doba vykladky jednoho sto-kilogramu trva 0.075 minut
-        Wait(0.075);
     }
 
     // vraceni korby nakladaku trva 0.28 minuty
@@ -233,11 +245,11 @@ void Traktor::Uvolni() {
     if(!Traktor::pozadavky.empty()) {
         Mlaticka *mlaticka = VybratMlaticku();
         PriradMlaticku(mlaticka);
-
     }
 
+    // v pripade, ze jiz nejsou dalsi mlaticky konec smeny
     else if(Mlaticka::vse.empty()) {
-        Transport(vzdalenost);
+        Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
 
         Traktor::vse.remove(this);
 
@@ -275,7 +287,7 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
         }
 
         // jinak bereme pouze pokud je vice zaplnena
-        else if(vybran->kapacita->Used() < aktualni->kapacita->Used()) {
+        else if(vybran->kapacita->Free() > aktualni->kapacita->Free()) {
             vybran = aktualni;
         }
     }

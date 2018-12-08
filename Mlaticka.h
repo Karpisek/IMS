@@ -22,6 +22,7 @@ class Traktor;
 class Hektar;
 
 extern int vzdalenost;
+extern double stredPole;
 
 class Mlaticka: public Process {
     using Process::Activate;

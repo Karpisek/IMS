@@ -24,13 +24,14 @@ list<Traktor *> Traktor::vse;
 list<Mlaticka *> Traktor::pozadavky;
 
 int vzdalenost;
+double stredPole;
 
 int main(int argc, char **argv) {
 
     (void) argc;
 
-    if(argc != 6) {
-        cout << "Struktura parametru: [rozloha pole (ha)] [pocet mlaticek] [pocet traktoru] [kapacita traktoru (t)] [vzdalenost zavodu (km)] " << endl;
+    if(argc < 7) {
+        cout << "Struktura parametru: [rozloha pole (ha)] [vzdalenost stredu pole (m) ][pocet mlaticek] [pocet traktoru N] [vzdalenost zavodu (km)] N * [kapacita traktoru (t)]" << endl;
         exit(0);
     }
 
@@ -42,20 +43,29 @@ int main(int argc, char **argv) {
     RandomSeed(time(nullptr));
 
     int rozloha = atoi(argv[1]);
-    int pocetMlaticek = atoi(argv[2]);
-    int pocetTraktoru = atoi(argv[3]);
-    int kapacitaTraktoru = atoi(argv[4]);
+    stredPole = (double)atoi(argv[2]) / METRY_NA_KM;   // prevod na kilometry
+    int pocetMlaticek = atoi(argv[3]);
+    int pocetTraktoru = atoi(argv[4]);
     vzdalenost = atoi(argv[5]);
+
+    vector<int> kapacity;
+    for(int i = 0; i < pocetTraktoru; i++) {
+        kapacity.push_back(atoi(argv[6 + i]));
+    }
 
     for(int x = 0; x < rozloha; x++) {
         new Hektar();
     }
 
     cout << "Pocet hektaru: " << Hektar::vse.size() << endl;
+    cout << "Vzdalenos do stredu pole: " << stredPole << endl;
     cout << "Pocet mlaticek: " << pocetMlaticek << endl;
     cout << "Pocet nakladaku: " << pocetTraktoru << endl;
-    cout << "Kapacita nakladaku: " << kapacitaTraktoru << endl;
     cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
+
+    for(int i = 0; i < pocetTraktoru; i++) {
+        cout << "Kapacita nakladaku [" << i << "]:" << kapacity[i] << "t" << endl;
+    }
     cout << "*******************************" << endl << endl;
 
     // vytvoreni mista pro vykladku
@@ -68,7 +78,7 @@ int main(int argc, char **argv) {
 
     // vytvareni traktoru
     for(int x=0; x < pocetTraktoru ; x++) {
-        new Traktor(x, &vykladka, kapacitaTraktoru);
+        new Traktor(x, &vykladka, kapacity[x]);
 
     }
 
