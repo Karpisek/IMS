@@ -17,10 +17,13 @@ Mlaticka::Mlaticka(int id) {
 }
 
 void Mlaticka::Behavior() {
+    PridejZaznamPrace(true);
     while(!Hektar::vse.empty()) {
         Hektar *hektar = VybratHektar();
         PoznitHektar(hektar);
     }
+    PridejZaznamPrace(true);
+    PridejZaznamPrace(false);
 
     // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
     if(kapacita->Used() > 0) {
@@ -39,6 +42,8 @@ void Mlaticka::Behavior() {
     }
 
     Mlaticka::vse.remove(this);
+    PridejZaznamPrace(false);
+    PridejZaznamPrace(false);
     this->PrintZaznamy();
     this->Terminate();
 }
@@ -52,7 +57,6 @@ Hektar* Mlaticka::VybratHektar() {
 
 void Mlaticka::PoznitHektar(Hektar *hektar) {
     while(!hektar->Empty()) {
-        PridejZaznamPrace(true);
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
         Enter(*kapacita, 1);        // pridani do vlastni kapacity

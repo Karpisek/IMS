@@ -30,9 +30,14 @@ private:
     Mlaticka *mlaticka;
     bool volny;
 
-public:
+
     vector<double> cas;
     vector<int> naplneni;
+    vector<double> cas2;     //cas zmeni naplneni
+    vector<int> prace;   //aktualni prace
+
+public:
+
     static list<Traktor *> vse;         // list vsech traktoru
     static list<Mlaticka *> pozadavky;  // list pozadavku
 
@@ -52,7 +57,8 @@ public:
     void Zaber();
     void Uvolni();
     bool jeVolny();
-    void PridejZaznam();
+    void PridejZaznamKapacita();
+    void PridejZaznamPrace(bool pracuji);
     void PrintZaznamy();
 
     static void PriradTraktor(Mlaticka *mlaticka);

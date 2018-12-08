@@ -30,7 +30,7 @@ private:
 
 
     vector<double> cas2;     //cas zmeni naplneni
-    vector<int> prace;   //aktualni naplneni
+    vector<int> prace;   //aktualni prace
 
 
 

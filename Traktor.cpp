@@ -13,11 +13,13 @@ Traktor::Traktor(int id, int vzdalenost, Vykladka *vykladka, Silo *silo) {
     this->vykladka = vykladka;
     this->silo = silo;
     this->volny = true;
-
+    PridejZaznamPrace(false);
     Traktor::vse.push_back(this);
 }
 
 void Traktor::Behavior() {
+    PridejZaznamPrace(false);
+    PridejZaznamPrace(true);
     while (true) {
 
         cout << "--------------------------------------------------------" << endl;
@@ -92,12 +94,12 @@ int Traktor::VylozMlaticku(Mlaticka *mlaticka) {
 
     int pred = kapacita->Used();
     mlaticka->PridejZaznamKapacita();
-    PridejZaznam();
+    PridejZaznamKapacita();
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
         mlaticka->kapacita->Leave(1);
         mlaticka->PridejZaznamKapacita();
         Enter(*kapacita, 1);
-        PridejZaznam();
+        PridejZaznamKapacita();
 
         if(mlaticka->stop) {
             mlaticka->Activate();
@@ -144,11 +146,11 @@ void Traktor::VyprazdniTraktor() {
     cout << "--------------------------------------------------------" << endl;
     cout << endl;
 
-    PridejZaznam();
+    PridejZaznamKapacita();
     while (!kapacita->Empty()) {
         Enter(*silo, 1);
         Leave(*kapacita, 1);
-        PridejZaznam();
+        PridejZaznamKapacita();
 
         // doba vykladky trva 0.075 minut
         Wait(0.075);
@@ -182,8 +184,12 @@ void Traktor::Uvolni() {
 
     } else {
         volny = true;
+        PridejZaznamPrace(true);
+        PridejZaznamPrace(false);
         PrintZaznamy();
         Passivate();
+        PridejZaznamPrace(false);
+        PridejZaznamPrace(true);
     }
 }
 
@@ -242,9 +248,14 @@ void Traktor::VytvorPozadavek(Mlaticka *mlaticka) {
     Traktor::pozadavky.push_back(mlaticka);
 }
 
-void Traktor::PridejZaznam() {
+void Traktor::PridejZaznamKapacita(){
     cas.push_back(Time);
     naplneni.push_back(kapacita->Used());
+}
+
+void Traktor::PridejZaznamPrace(bool pracuji) {
+    cas2.push_back(Time);
+    prace.push_back(pracuji);
 }
 
 void Traktor::PrintZaznamy() {
@@ -253,6 +264,14 @@ void Traktor::PrintZaznamy() {
     myfile.open(jmeno);
     for(unsigned int i = 0;this->cas.size() > i; i++){
         myfile << this->cas[i] << " " <<this->naplneni[i] << endl;
+    }
+    myfile.close();
+
+
+    jmeno = "traktorPrace" + to_string(this->id) + ".dat";
+    myfile.open(jmeno);
+    for(unsigned int i = 0;this->cas2.size() > i; i++){
+        myfile << this->cas2[i] << " " <<this->prace[i] << endl;
     }
     myfile.close();
 }
