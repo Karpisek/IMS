@@ -1,7 +1,3 @@
-//
-// Created by Miro on 07/12/2018.
-//
-
 #ifndef MLATICKA_KAPACITA_H
 #define MLATICKA_KAPACITA_H
 

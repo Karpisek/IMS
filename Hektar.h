@@ -1,7 +1,3 @@
-//
-// Created by Miro on 06/12/2018.
-//
-
 #ifndef MLATICKA_HEKTAR_H
 #define MLATICKA_HEKTAR_H
 

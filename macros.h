@@ -1,9 +1,5 @@
-//
-// Created by Miro on 06/12/2018.
-//
 // Pomocna makra pro vypocet,
 // sekundy je treba zadavat v minutach tzn. 2s = 2/60 ~ 0.03 minut
-//
 
 #ifndef MLATICKA_MACROS_H
 #define MLATICKA_MACROS_H

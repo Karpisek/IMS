@@ -1,7 +1,3 @@
-//
-// Created by Miro on 07/12/2018.
-//
-
 #include "Kapacita.h"
 
 Kapacita::Kapacita(int max, int init) {
