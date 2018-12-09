@@ -21,8 +21,6 @@ Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
     Activate();
 }
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wmissing-noreturn"
 void Traktor::Behavior() {
     PridejZaznamPrace(true);
 
@@ -93,8 +91,6 @@ void Traktor::Behavior() {
         Uvolni();
     }
 }
-
-#pragma clang diagnostic pop
 
 Mlaticka* Traktor::VybratMlaticku() {
     Mlaticka *vybrana = nullptr;
