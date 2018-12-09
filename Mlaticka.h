@@ -5,24 +5,23 @@
 #ifndef MLATICKA_MLATICKA_H
 #define MLATICKA_MLATICKA_H
 
-#include "simlib.h"
-#include <list>
-#include "macros.h"
-#include <iostream>
-#include "Hektar.h"
-#include "Traktor.h"
 #include <vector>
 #include <string>
 #include <fstream>
+#include <list>
+#include <iostream>
+
+#include "simlib.h"
+#include "macros.h"
+
+#include "Hektar.h"
+#include "Traktor.h"
 #include "Kapacita.h"
 
 using namespace std;
 
 class Traktor;
 class Hektar;
-
-extern int vzdalenost;
-extern double stredPole;
 
 class Mlaticka: public Process {
     using Process::Activate;

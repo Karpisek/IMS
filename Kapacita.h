@@ -5,7 +5,6 @@
 #ifndef MLATICKA_KAPACITA_H
 #define MLATICKA_KAPACITA_H
 
-
 class Kapacita {
 private:
     int max;

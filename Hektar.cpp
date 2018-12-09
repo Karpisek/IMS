@@ -5,6 +5,7 @@
 #include "Hektar.h"
 
 int Hektar::zbyvajiciVynos = 0;
+list<Hektar *> Hektar::vse;
 
 Hektar::Hektar() {
     auto vynos = (int)Uniform(32, 38);

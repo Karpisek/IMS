@@ -5,7 +5,7 @@
 #include "Vykladka.h"
 
 Vykladka::Vykladka() {
-    this->kapacita = new Kapacita(KAPACITA_VYKLADKY);
+    this->kapacita = new Kapacita(KAPACITA_VYKLADKY * TUNA_NA_STOKG);
     this->mistaNaVykladku = new Kapacita(MIST_NA_VYLOZENI, MIST_NA_VYLOZENI);
 
     Activate();

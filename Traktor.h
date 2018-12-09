@@ -5,14 +5,16 @@
 #ifndef MLATICKA_NAKLADAK_H
 #define MLATICKA_NAKLADAK_H
 
-#include "simlib.h"
-#include "macros.h"
 #include <iostream>
 #include <list>
-#include "Vykladka.h"
-#include "Mlaticka.h"
 #include <algorithm>
 #include <vector>
+
+#include "simlib.h"
+#include "macros.h"
+
+#include "Vykladka.h"
+#include "Mlaticka.h"
 #include "Kapacita.h"
 
 using namespace std;
@@ -27,11 +29,10 @@ private:
     Mlaticka *mlaticka;
     bool volny;
 
-
     vector<double> cas;
     vector<int> naplneni;
-    vector<double> cas2;     //cas zmeni naplneni
-    vector<int> prace;   //aktualni prace
+    vector<double> cas2;                // cas zmeni naplneni
+    vector<int> prace;                  // aktualni prace
 
 public:
 
@@ -39,7 +40,7 @@ public:
     static list<Mlaticka *> pozadavky;  // list pozadavku
     static int teoratickaKapacita;
 
-    Kapacita *kapacita;     // vnitrni kapacita
+    Kapacita *kapacita;                 // vnitrni kapacita
     int id;
 
     Traktor(int id, Vykladka *vykladka, int kapacita);

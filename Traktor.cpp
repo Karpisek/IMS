@@ -5,9 +5,11 @@
 #include "Traktor.h"
 
 int Traktor::teoratickaKapacita = 0;
+list<Traktor *> Traktor::vse;
+list<Mlaticka *> Traktor::pozadavky;
 
 Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
-    this->kapacita = new Kapacita(kapacita * 10);      // nastaveni kapacity pro sto-kilogramy
+    this->kapacita = new Kapacita(kapacita * TUNA_NA_STOKG);      // nastaveni kapacity pro sto-kilogramy
     this->id = id;
     this->vykladka = vykladka;
 
@@ -15,8 +17,6 @@ Traktor::Traktor(int id, Vykladka *vykladka, int kapacita) {
 
     Traktor::teoratickaKapacita += this->kapacita->Capacity();
 
-
-    cout << "CAPACITY: " << Traktor::teoratickaKapacita << endl;
     Traktor::vse.push_back(this);
     Activate();
 }
@@ -27,7 +27,7 @@ void Traktor::Behavior() {
     PridejZaznamPrace(true);
 
     // dorazi na misto urceni a ceka na dalsi akci
-    Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+    Transport(VZDALENOST_VYKLADKY, TRAKTOR_SILNICE_RYCHLOST);
     Uvolni();
 
     while (true) {
@@ -46,18 +46,14 @@ void Traktor::Behavior() {
         if(kapacita->Full()) {
 
             // presun z pole na silnic
-            Transport(Uniform(0, stredPole), TRAKTOR_POLE_RYCHLOST);
+            Transport(Uniform(MIN_VZDALENOST_POLE, MAX_VZDALENOST_POLE), TRAKTOR_POLE_RYCHLOST);
 
             // presun po silnici k vykladacimmu mistu
-            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+            Transport(VZDALENOST_VYKLADKY, TRAKTOR_SILNICE_RYCHLOST);
             VyprazdniTraktor();
 
             // kontrola jestli potencionalni kapacita nakladaku ktere jsou na poli + kteri jiz na pole jedou
             // staci na zbyvajici vynos na poli a v mlatickach
-            // todo: otestovat jestli funguje jak ma, pripadne mu tam pridat chybu, aby nebyl v odhadovani kolik
-            // todo: zbyva jeste na poli tak presny !
-
-//            cout << id << " -> " << (Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) << " " << Traktor::teoratickaKapacita;
             if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= Traktor::teoratickaKapacita) {
                 Traktor::vse.remove(this);
 
@@ -70,7 +66,7 @@ void Traktor::Behavior() {
 
             // v pripade, ze je na poli jeste dostatek vynosu, vraci se traktor zpet
             Traktor::teoratickaKapacita += kapacita->Capacity();
-            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+            Transport(VZDALENOST_VYKLADKY, TRAKTOR_SILNICE_RYCHLOST);
         }
 
         // pokud traktor neni plny, ale jiz nejsou zadne mlaticky v provozu, jedna se o konec smeny
@@ -79,10 +75,10 @@ void Traktor::Behavior() {
             Traktor::teoratickaKapacita -= kapacita->Free();
 
             // presun z pole na silnic
-            Transport(Uniform(0, stredPole), TRAKTOR_POLE_RYCHLOST);
+            Transport(Uniform(MIN_VZDALENOST_POLE, MAX_VZDALENOST_POLE), TRAKTOR_POLE_RYCHLOST);
 
             // presun k vykladce
-            Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+            Transport(VZDALENOST_VYKLADKY, TRAKTOR_SILNICE_RYCHLOST);
 
             VyprazdniTraktor();
             Traktor::vse.remove(this);
@@ -138,7 +134,7 @@ Mlaticka* Traktor::VybratMlaticku() {
 
 void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     // presun nakladak k mlaticce
-    Transport(Uniform((double) 0.0, stredPole), TRAKTOR_POLE_RYCHLOST);
+    Transport(Uniform(MIN_VZDALENOST_POLE, MAX_VZDALENOST_POLE), TRAKTOR_POLE_RYCHLOST);
 
     cout << "--------------------------------------------------------" << endl;
     cout << "Time: " << Time << endl;
@@ -156,7 +152,7 @@ void Traktor::VylozMlaticku(Mlaticka *mlaticka) {
     while(!kapacita->Full() && !mlaticka->kapacita->Empty()) {
 
         // vyprazdeni 100kg trva 0.02 minut
-        Wait(0.02);
+        Wait(VYPRAZDNENI_STOKG);
 
         mlaticka->kapacita->Leave(1);
         mlaticka->PridejZaznamKapacita();
@@ -210,7 +206,7 @@ void Traktor::VyprazdniTraktor() {
     PridejZaznamKapacita();
 
     // zvednuti korby nakladaku trva 0.28 minuty
-    Wait(0.28);
+    Wait(RYCHLOST_ZVEDANI_NAVESU);
 
     // dokud neni nakladak prazdny, vykladej (naklopi korbu a vse vypadne)
     if (!kapacita->Empty()) {
@@ -222,7 +218,7 @@ void Traktor::VyprazdniTraktor() {
         PridejZaznamKapacita();
     }
     // vraceni korby nakladaku trva 0.28 minuty
-    Wait(0.28);
+    Wait(RYCHLOST_ZVEDANI_NAVESU);
 
     vykladka->Uvolni();
 }
@@ -253,7 +249,7 @@ void Traktor::Uvolni() {
             if((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= (Traktor::teoratickaKapacita - kapacita->Free())) {
                 Traktor::teoratickaKapacita -= kapacita->Free();
 
-                Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+                Transport(VZDALENOST_VYKLADKY, TRAKTOR_SILNICE_RYCHLOST);
 
                 Traktor::vse.remove(this);
 
@@ -261,6 +257,7 @@ void Traktor::Uvolni() {
 
                 Terminate();
             }
+
             else {
                 volny = true;
                 PridejZaznamPrace(true);
@@ -278,7 +275,7 @@ void Traktor::Uvolni() {
     else if(Mlaticka::vse.empty() && ((Mlaticka::celkovyUchovanyVynos + Hektar::zbyvajiciVynos) <= (Traktor::teoratickaKapacita - kapacita->Free()))) {
         Traktor::teoratickaKapacita -= kapacita->Free();
 
-        Transport(vzdalenost, TRAKTOR_SILNICE_RYCHLOST);
+        Transport(VZDALENOST_VYKLADKY, TRAKTOR_SILNICE_RYCHLOST);
 
         Traktor::vse.remove(this);
 
@@ -340,7 +337,7 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
         bool zadano = (find(Traktor::pozadavky.begin(), Traktor::pozadavky.end(), zadatel) != Traktor::pozadavky.end());
 
         if(!zadano) {
-//            if(!zadatel->jeZabrana()) {
+            if(!zadatel->jeZabrana()) {
                 cout << "--------------------------------------------------------" << endl;
                 cout << "Time: " << Time << endl;
                 cout << "Mlaticka (" << zadatel->id << ") zada pri kapacite [" << zadatel->kapacita->Used() << "]"
@@ -348,7 +345,7 @@ void Traktor::PriradTraktor(Mlaticka* zadatel) {
                 cout << "--------------------------------------------------------" << endl;
                 cout << endl;
                 Traktor::VytvorPozadavek(zadatel);
-//            }
+            }
         }
     }
 }

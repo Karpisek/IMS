@@ -16,24 +16,10 @@
 
 using namespace std;
 
-// static listy jednotlivych stroju
-
-list<Hektar *> Hektar::vse;
-list<Mlaticka *> Mlaticka::vse;
-list<Traktor *> Traktor::vse;
-list<Mlaticka *> Traktor::pozadavky;
-
-int vzdalenost;
-double stredPole;
-
 int main(int argc, char **argv) {
 
     (void) argc;
-
-    if(argc < 6) {
-        cout << "Struktura parametru: [rozloha pole (ha)] [vzdalenost stredu pole (m) ][pocet mlaticek] [pocet traktoru N] [vzdalenost zavodu (km)] N * [kapacita traktoru (t)]" << endl;
-        exit(0);
-    }
+    (void) argv;
 
     list<Traktor *> listTraktoru;
     list<Mlaticka *> listMlaticek;
@@ -42,34 +28,19 @@ int main(int argc, char **argv) {
     SetStep(0.001);
     RandomSeed(time(nullptr));
 
-    int rozloha = atoi(argv[1]);
-    stredPole = (double)atoi(argv[2]) / METRY_NA_KM;   // prevod na kilometry
-    int pocetMlaticek = atoi(argv[3]);
-    int pocetTraktoru = atoi(argv[4]);
-    vzdalenost = atoi(argv[5]);
+    cout << "Rozloha: " << ROZLOHA_POLE << "ha" << endl;
+    cout << "Vzdalenos do stredu pole: " << MAX_VZDALENOST_POLE << "km" << endl;
+    cout << "Pocet mlaticek: " << POCET_MLATICEK << endl;
+    cout << "Pocet traktoru: " << POCET_TRAKTORU << endl;
+    cout << "Vzdalenost zasobniku: " << VZDALENOST_VYKLADKY << "km" << endl;
+    cout << "Kapacita nakladaku: " << KAPACITA_TRAKTORU << "t" << endl;
 
-    if(argc < pocetTraktoru + 6) {
-        cout << "kapacity pro nakladaky nejsou urceny pro vsechny" << endl;
-        exit(0);
-    }
-
-    vector<int> kapacity;
-    for(int i = 0; i < pocetTraktoru; i++) {
-        kapacity.push_back(atoi(argv[6 + i]));
-    }
-
-    for(int x = 0; x < rozloha; x++) {
+    for(int x = 0; x < ROZLOHA_POLE; x++) {
         new Hektar();
     }
 
-    cout << "Pocet hektaru: " << Hektar::vse.size() << endl;
-    cout << "Vzdalenos do stredu pole: " << stredPole << endl;
-    cout << "Pocet mlaticek: " << pocetMlaticek << endl;
-    cout << "Pocet nakladaku: " << pocetTraktoru << endl;
-    cout << "Vzdalenost zasobniku: " << vzdalenost << endl;
+    for(int i = 0; i < POCET_TRAKTORU; i++) {
 
-    for(int i = 0; i < pocetTraktoru; i++) {
-        cout << "Kapacita nakladaku [" << i << "]:" << kapacity[i] << "t" << endl;
     }
     cout << "*******************************" << endl << endl;
 
@@ -77,13 +48,13 @@ int main(int argc, char **argv) {
     Vykladka vykladka;
 
     // vytvareni mlaticek
-    for(int x=0; x < pocetMlaticek ; x++) {
+    for(int x=0; x < POCET_MLATICEK ; x++) {
         new Mlaticka(x);
     }
 
     // vytvareni traktoru
-    for(int x=0; x < pocetTraktoru ; x++) {
-        new Traktor(x, &vykladka, kapacity[x]);
+    for(int x=0; x < POCET_TRAKTORU ; x++) {
+        new Traktor(x, &vykladka, KAPACITA_TRAKTORU);
 
     }
 

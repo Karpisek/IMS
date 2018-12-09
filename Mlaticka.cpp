@@ -5,9 +5,10 @@
 #include "Mlaticka.h"
 
 int Mlaticka::celkovyUchovanyVynos = 0;
+list<Mlaticka *> Mlaticka::vse;
 
 Mlaticka::Mlaticka(int id) {
-    this->kapacita = new Kapacita(KAPACITA_MLATICKY);
+    this->kapacita = new Kapacita(KAPACITA_MLATICKY * TUNA_NA_STOKG);
     this->id = id;
 
     this->stop = false;
@@ -19,7 +20,7 @@ Mlaticka::Mlaticka(int id) {
 
 void Mlaticka::Behavior() {
     PridejZaznamPrace(true);
-    Transport(vzdalenost);
+    Transport(VZDALENOST_VYKLADKY);
 
     while(!Hektar::vse.empty()) {
         Hektar *hektar = VybratHektar();
@@ -36,19 +37,21 @@ void Mlaticka::Behavior() {
     cout << endl;
 
     // mlaticka dokoncila praci na hektarech ale neni vyprazdnena -> musi cekat na traktor
-    while(kapacita->Used() > 0) {
+    while(!kapacita->Empty()) {
         Mlaticka::vse.remove(this);
         this->stop = true;
         Traktor::PriradTraktor(this);
         this->Passivate();
     }
 
+    // zaznam pro vypis
     PridejZaznamPrace(false);
     PridejZaznamPrace(true);
 
     // presun do zavodu
-    Transport(vzdalenost);
+    Transport(VZDALENOST_VYKLADKY);
 
+    // zaznam pro vypis a ukonceni
     PridejZaznamPrace(true);
     PridejZaznamPrace(false);
     PrintZaznamy();
@@ -64,10 +67,9 @@ Hektar* Mlaticka::VybratHektar() {
 
 void Mlaticka::PoznitHektar(Hektar *hektar) {
     while(!hektar->Empty()) {
-        //PridejZaznamPrace(true);
         hektar->Leave(1);           // vezme jeden sto-kilogram
         Wait(hektar->doba);         // sklizen jednoho sto-kilogramu
-        kapacita->Enter(1);        // pridani do vlastni kapacity
+        kapacita->Enter(1);         // pridani do vlastni kapacity
 
         Mlaticka::celkovyUchovanyVynos++;
         Hektar::zbyvajiciVynos--;
@@ -90,6 +92,7 @@ void Mlaticka::PoznitHektar(Hektar *hektar) {
             this->stop = true;
             PridejZaznamPrace(true);
             PridejZaznamPrace(false);
+
             this->Passivate();
             PridejZaznamPrace(false);
             PridejZaznamPrace(true);
